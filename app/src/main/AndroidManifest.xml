@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Localeasy1">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Localeasy1">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ui.activities.LoginActivity"
+            android:exported="false"
+            android:label="Login"
+            android:theme="@style/Theme.Localeasy1" />
+        <activity
+            android:name=".ui.activities.SignupActivity"
+            android:exported="false"
+            android:label="Sign Up"
+            android:theme="@style/Theme.Localeasy1" />
+        <activity
+            android:name=".ui.activities.UserMainActivity"
+            android:exported="false"
+            android:label="LocalEase"
+            android:theme="@style/Theme.Localeasy1" />
+        <activity
+            android:name=".ui.activities.HomeActivity"
+            android:exported="false"
+            android:label="Discover"
+            android:theme="@style/Theme.Localeasy1" />
+        <activity
+            android:name=".ui.activities.BookingActivity"
+            android:exported="false"
+            android:label="Book Service"
+            android:theme="@style/Theme.Localeasy1" />
+        <activity
+            android:name=".ui.activities.ProfileActivity"
+            android:exported="false"
+            android:label="Profile"
+            android:theme="@style/Theme.Localeasy1" />
+        <activity
+            android:name=".ui.activities.AdminActivity"
+            android:exported="false"
+            android:label="Admin Dashboard"
+            android:theme="@style/Theme.Localeasy1" />
+        <activity
+            android:name=".ui.activities.SuperAdminActivity"
+            android:exported="false"
+            android:label="Super Admin Panel"
+            android:theme="@style/Theme.Localeasy1" />
+        <activity
+            android:name=".ui.activities.AddServiceActivity"
+            android:exported="false"
+            android:label="Add Service"
+            android:theme="@style/Theme.Localeasy1" />
+        <activity
+            android:name=".ui.activities.CreateOfferActivity"
+            android:exported="false"
+            android:label="Create Offer"
+            android:theme="@style/Theme.Localeasy1" />
+        <activity
+            android:name=".ui.activities.BookingConfirmActivity"
+            android:exported="false"
+            android:label="Booking Confirmation"
+            android:theme="@style/Theme.Localeasy1" />
+        <activity
+            android:name=".ui.activities.ServiceListActivity"
+            android:exported="false"
+            android:label="Manage Services"
+            android:theme="@style/Theme.Localeasy1" />
+        <activity
+            android:name=".ui.activities.BusinessDetailActivity"
+            android:exported="false"
+            android:label="Business Details"
+            android:theme="@style/Theme.Localeasy1" />
+    </application>
+
+</manifest>
