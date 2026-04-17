@@ -62,7 +62,7 @@
             android:id="@+id/bookButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/button_primary_bg"
+            android:background="@drawable/btn_primary"
             android:text="Book"
             android:textColor="@color/white"
             android:textSize="14sp" />

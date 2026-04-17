@@ -79,10 +79,12 @@
 
                 <Button
                     android:id="@+id/loginButton"
-                    style="@style/ButtonPrimary"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Sign In" />
+                    android:background="@drawable/btn_primary"
+                    android:text="Sign In"
+                    android:textColor="@color/white"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"

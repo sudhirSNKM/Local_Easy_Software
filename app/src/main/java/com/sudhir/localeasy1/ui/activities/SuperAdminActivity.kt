@@ -2,6 +2,7 @@ package com.sudhir.localeasy1.ui.activities
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import com.sudhir.localeasy1.databinding.ActivitySuperAdminBinding
 import com.sudhir.localeasy1.ui.fragments.SuperAdminAnalyticsFragment
 import com.sudhir.localeasy1.ui.fragments.SuperAdminDashboardFragment
@@ -14,6 +15,7 @@ class SuperAdminActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, true)
         binding = ActivitySuperAdminBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -38,24 +40,48 @@ class SuperAdminActivity : AppCompatActivity() {
 
     private fun loadDashboard() {
         supportFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                com.sudhir.localeasy1.R.anim.slide_in_right,
+                com.sudhir.localeasy1.R.anim.fade_out,
+                com.sudhir.localeasy1.R.anim.fade_in,
+                com.sudhir.localeasy1.R.anim.slide_out_right
+            )
             .replace(binding.frameLayout.id, SuperAdminDashboardFragment())
             .commit()
     }
 
     private fun loadManage() {
         supportFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                com.sudhir.localeasy1.R.anim.slide_in_right,
+                com.sudhir.localeasy1.R.anim.fade_out,
+                com.sudhir.localeasy1.R.anim.fade_in,
+                com.sudhir.localeasy1.R.anim.slide_out_right
+            )
             .replace(binding.frameLayout.id, SuperAdminManageBusinessFragment())
             .commit()
     }
 
     private fun loadAnalytics() {
         supportFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                com.sudhir.localeasy1.R.anim.slide_in_right,
+                com.sudhir.localeasy1.R.anim.fade_out,
+                com.sudhir.localeasy1.R.anim.fade_in,
+                com.sudhir.localeasy1.R.anim.slide_out_right
+            )
             .replace(binding.frameLayout.id, SuperAdminAnalyticsFragment())
             .commit()
     }
 
     private fun loadProfile() {
         supportFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                com.sudhir.localeasy1.R.anim.slide_in_right,
+                com.sudhir.localeasy1.R.anim.fade_out,
+                com.sudhir.localeasy1.R.anim.fade_in,
+                com.sudhir.localeasy1.R.anim.slide_out_right
+            )
             .replace(binding.frameLayout.id, SuperAdminProfileFragment())
             .commit()
     }

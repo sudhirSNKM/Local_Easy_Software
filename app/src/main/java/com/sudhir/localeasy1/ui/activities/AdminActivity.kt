@@ -1,11 +1,14 @@
 package com.sudhir.localeasy1.ui.activities
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
@@ -24,8 +27,10 @@ class AdminActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, true)
         binding = ActivityAdminBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        findViewById<TextView>(R.id.titleText).text = "Admin Dashboard"
 
         setupRecyclerView()
         setupObservers()
@@ -35,7 +40,7 @@ class AdminActivity : AppCompatActivity() {
 
     private fun setupRecyclerView() {
         bookingAdapter = BookingAdapter(emptyList(), true) { bookingId, status ->
-            adminViewModel.updateBookingStatus(bookingId, status)
+            adminBusinessId?.let { adminViewModel.updateBookingStatus(bookingId, status, it) }
         }
         binding.bookingsRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.bookingsRecyclerView.adapter = bookingAdapter
@@ -52,6 +57,7 @@ class AdminActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             startActivity(Intent(this, AddServiceActivity::class.java))
+            overridePendingTransition(R.anim.slide_in_right, R.anim.fade_out)
         }
 
         binding.createOfferButton.setOnClickListener {
@@ -64,6 +70,7 @@ class AdminActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             startActivity(Intent(this, CreateOfferActivity::class.java))
+            overridePendingTransition(R.anim.slide_in_right, R.anim.fade_out)
         }
 
         binding.bottomNav.setOnItemSelectedListener { item ->
@@ -71,10 +78,12 @@ class AdminActivity : AppCompatActivity() {
                 R.id.nav_dashboard -> true
                 R.id.nav_services -> {
                     startActivity(Intent(this, ServiceListActivity::class.java))
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.fade_out)
                     true
                 }
                 R.id.nav_profile -> {
                     startActivity(Intent(this, ProfileActivity::class.java))
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.fade_out)
                     true
                 }
                 else -> false
@@ -87,10 +96,7 @@ class AdminActivity : AppCompatActivity() {
 
     private fun setupObservers() {
         adminViewModel.bookings.observe(this, Observer { bookings ->
-            bookingAdapter = BookingAdapter(bookings, true) { bookingId, status ->
-                adminViewModel.updateBookingStatus(bookingId, status)
-            }
-            binding.bookingsRecyclerView.adapter = bookingAdapter
+            bookingAdapter.updateBookings(bookings)
         })
 
         adminViewModel.bookingsToday.observe(this, Observer { count ->
@@ -131,14 +137,20 @@ class AdminActivity : AppCompatActivity() {
 
                 if (adminBusinessId.isNullOrBlank()) {
                     binding.addServiceButton.text = "Create Business"
+                    binding.businessStatusTextView.text = "No business found. Create one to continue."
+                    binding.businessStatusTextView.setTextColor(Color.RED)
                     Toast.makeText(this, "No business found. Create one to continue.", Toast.LENGTH_SHORT).show()
                     return@addOnSuccessListener
                 }
 
                 if (!adminBusinessApproved) {
                     Toast.makeText(this, "Business waiting for approval", Toast.LENGTH_SHORT).show()
+                    binding.businessStatusTextView.text = "Pending approval. Please wait..."
+                    binding.businessStatusTextView.setTextColor(Color.RED)
                 } else {
-                    loadDashboardData()
+                    binding.businessStatusTextView.text = "Business Active"
+                    binding.businessStatusTextView.setTextColor(Color.parseColor("#16A34A"))
+                    adminViewModel.loadDashboardData(adminBusinessId!!)
                 }
             }
     }

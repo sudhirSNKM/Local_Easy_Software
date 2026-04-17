@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.google.firebase.firestore.FirebaseFirestore
 import com.sudhir.localeasy1.databinding.FragmentSuperAdminDashboardBinding
@@ -25,6 +26,7 @@ class SuperAdminDashboardFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        view.findViewById<TextView>(com.sudhir.localeasy1.R.id.titleText).text = "Dashboard"
         loadStats()
     }
 
@@ -32,15 +34,21 @@ class SuperAdminDashboardFragment : Fragment() {
         db.collection("businesses")
             .whereEqualTo("approved", false)
             .get()
-            .addOnSuccessListener { binding.pendingApprovalsValue.text = it.size().toString() }
+            .addOnSuccessListener { result ->
+                _binding?.pendingApprovalsValue?.text = result.size().toString()
+            }
 
         db.collection("businesses")
             .get()
-            .addOnSuccessListener { binding.totalBusinessesValue.text = it.size().toString() }
+            .addOnSuccessListener { result ->
+                _binding?.totalBusinessesValue?.text = result.size().toString()
+            }
 
         db.collection("users")
             .get()
-            .addOnSuccessListener { binding.totalUsersValue.text = it.size().toString() }
+            .addOnSuccessListener { result ->
+                _binding?.totalUsersValue?.text = result.size().toString()
+            }
     }
 
     override fun onDestroyView() {

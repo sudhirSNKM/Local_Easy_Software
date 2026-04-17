@@ -10,7 +10,7 @@ class BookingRepository {
     suspend fun createBooking(booking: Booking): Result<String> {
         return try {
             val docRef = db.collection("bookings").document()
-            val bookingWithId = booking.copy(id = docRef.id)
+            val bookingWithId = booking.copy(id = docRef.id, createdAt = System.currentTimeMillis())
             docRef.set(bookingWithId).await()
             Result.success(docRef.id)
         } catch (e: Exception) {
@@ -18,11 +18,28 @@ class BookingRepository {
         }
     }
 
+    suspend fun isSlotAvailable(businessId: String, time: Long): Boolean {
+        return try {
+            val snapshot = db.collection("bookings")
+                .whereEqualTo("businessId", businessId)
+                .whereEqualTo("time", time)
+                .get().await()
+            
+            // Check if any booking for this slot is NOT cancelled
+            val activeBookings = snapshot.documents.filter { doc ->
+                val status = doc.getString("status") ?: "pending"
+                status != "cancelled"
+            }
+            activeBookings.isEmpty()
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     suspend fun getUserBookings(userId: String): List<Booking> {
         return try {
             val snapshot = db.collection("bookings")
                 .whereEqualTo("userId", userId)
-                .orderBy("time")
                 .get().await()
             snapshot.documents.map { doc ->
                 Booking(
@@ -30,6 +47,7 @@ class BookingRepository {
                     userId = doc.getString("userId") ?: "",
                     serviceId = doc.getString("serviceId") ?: "",
                     businessId = doc.getString("businessId") ?: "",
+                    serviceName = doc.getString("serviceName") ?: "",
                     time = doc.getLong("time") ?: 0L,
                     status = doc.getString("status") ?: "pending",
                     notes = doc.getString("notes") ?: "",
@@ -45,7 +63,6 @@ class BookingRepository {
         return try {
             val snapshot = db.collection("bookings")
                 .whereEqualTo("businessId", businessId)
-                .orderBy("time")
                 .get().await()
             snapshot.documents.map { doc ->
                 Booking(
@@ -53,6 +70,7 @@ class BookingRepository {
                     userId = doc.getString("userId") ?: "",
                     serviceId = doc.getString("serviceId") ?: "",
                     businessId = doc.getString("businessId") ?: "",
+                    serviceName = doc.getString("serviceName") ?: "",
                     time = doc.getLong("time") ?: 0L,
                     status = doc.getString("status") ?: "pending",
                     notes = doc.getString("notes") ?: "",

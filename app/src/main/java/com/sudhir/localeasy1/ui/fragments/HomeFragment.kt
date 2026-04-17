@@ -86,7 +86,11 @@ class HomeFragment : Fragment() {
                             setPadding(16, 8, 16, 8)
                             setOnClickListener {
                                 Log.d("HomeFragment", "Category clicked: $category")
-                                homeViewModel.loadServicesByCategory(category)
+                                if (category == "All") {
+                                    homeViewModel.loadAllServices()
+                                } else {
+                                    homeViewModel.loadServicesByCategory(category)
+                                }
                             }
                         }
                         val params = LinearLayout.LayoutParams(

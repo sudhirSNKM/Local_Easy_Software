@@ -4,7 +4,9 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import androidx.recyclerview.widget.RecyclerView
+import com.sudhir.localeasy1.R
 import com.sudhir.localeasy1.data.Service
 import com.sudhir.localeasy1.databinding.ItemServiceBinding
 import com.sudhir.localeasy1.databinding.ItemServiceAdminBinding
@@ -63,7 +65,25 @@ class ServiceAdapter(
             binding.serviceDurationTextView.text = "Duration: ${service.duration}"
             binding.servicePriceTextView.text = "₹${service.price}"
 
+            // Apply fade-in animation
+            val fadeInAnim = AnimationUtils.loadAnimation(binding.root.context, R.anim.fade_in)
+            binding.root.startAnimation(fadeInAnim)
+
             binding.bookButton.setOnClickListener {
+                // Scale animation on button click
+                it.animate()
+                    .scaleX(0.95f)
+                    .scaleY(0.95f)
+                    .setDuration(100)
+                    .withEndAction {
+                        it.animate()
+                            .scaleX(1f)
+                            .scaleY(1f)
+                            .setDuration(100)
+                            .start()
+                    }
+                    .start()
+
                 val intent = Intent(binding.root.context, BookingConfirmActivity::class.java).apply {
                     putExtra("serviceId", service.id)
                     putExtra("businessId", service.businessId)

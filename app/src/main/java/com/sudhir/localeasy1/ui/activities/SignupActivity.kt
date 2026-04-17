@@ -3,6 +3,8 @@ package com.sudhir.localeasy1.ui.activities
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.RadioButton
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -17,6 +19,7 @@ class SignupActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySignupBinding
     private val authViewModel: AuthViewModel by viewModels()
+    private val categories = listOf("Salon", "Clinic", "Gym", "Spa", "Restaurant", "Cleaning")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +29,12 @@ class SignupActivity : AppCompatActivity() {
         setupObservers()
         setupClickListeners()
         setupRoleSelection()
+        setupCategoryDropdown()
+    }
+
+    private fun setupCategoryDropdown() {
+        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, categories)
+        (binding.businessCategoryDropdown as? AutoCompleteTextView)?.setAdapter(adapter)
     }
 
     private fun setupObservers() {
@@ -53,6 +62,7 @@ class SignupActivity : AppCompatActivity() {
             val password = binding.passwordEditText.text.toString().trim()
             val selectedRole = getSelectedRole()
             val businessName = binding.businessNameEditText.text.toString().trim()
+            val businessCategory = binding.businessCategoryDropdown.text.toString().trim()
             val businessDesc = binding.businessDescEditText.text.toString().trim()
 
             if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
@@ -60,12 +70,12 @@ class SignupActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            if (selectedRole == UserRole.ADMIN && (businessName.isEmpty() || businessDesc.isEmpty())) {
+            if (selectedRole == UserRole.ADMIN && (businessName.isEmpty() || businessCategory.isEmpty() || businessDesc.isEmpty())) {
                 Toast.makeText(this, "Please fill business details", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            authViewModel.signUp(email, password, name, selectedRole, businessName, businessDesc,
+            authViewModel.signUp(email, password, name, selectedRole, businessName, businessDesc, businessCategory,
                 onSuccess = {
                     Toast.makeText(this, "Registration successful", Toast.LENGTH_SHORT).show()
                 },

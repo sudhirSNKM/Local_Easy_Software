@@ -63,10 +63,18 @@ class BookingViewModel : ViewModel() {
             _isLoading.value = true
             _error.value = null
             try {
+                // Check if slot is already booked
+                val isAvailable = bookingRepository.isSlotAvailable(service.businessId, time)
+                if (!isAvailable) {
+                    _error.value = "This time slot is already booked. Please choose another one."
+                    return@launch
+                }
+
                 val booking = Booking(
                     userId = userId,
                     serviceId = service.id,
                     businessId = service.businessId,
+                    serviceName = service.name,
                     time = time,
                     notes = notes
                 )

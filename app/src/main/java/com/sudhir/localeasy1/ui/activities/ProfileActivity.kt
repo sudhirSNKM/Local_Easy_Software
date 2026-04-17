@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.sudhir.localeasy1.MainActivity
+import com.sudhir.localeasy1.data.Booking
 import com.sudhir.localeasy1.databinding.ActivityProfileBinding
 import com.sudhir.localeasy1.ui.adapters.BookingAdapter
 import com.sudhir.localeasy1.ui.viewmodel.AuthViewModel
@@ -26,6 +27,8 @@ class ProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        binding.header.titleText.text = "My Profile"
 
         setupRecyclerView()
         loadUserProfile()
@@ -67,11 +70,27 @@ class ProfileActivity : AppCompatActivity() {
         db.collection("bookings")
             .whereEqualTo("userId", uid)
             .get()
-            .addOnSuccessListener { documents ->
-                // Since I don't have the Booking model mapping easily here, 
-                // and the user didn't ask to fix the booking list specifically,
-                // I'll keep it as is or update if I find the Booking class.
-                // Assuming Booking class exists in com.sudhir.localeasy1.data
+            .addOnSuccessListener { result ->
+                val bookings = mutableListOf<Booking>()
+                for (doc in result) {
+                    try {
+                        val booking = Booking(
+                            id = doc.id,
+                            userId = doc.getString("userId") ?: "",
+                            serviceId = doc.getString("serviceId") ?: "",
+                            businessId = doc.getString("businessId") ?: "",
+                            serviceName = doc.getString("serviceName") ?: "Unknown Service",
+                            time = doc.getLong("time") ?: System.currentTimeMillis(),
+                            status = doc.getString("status") ?: "pending",
+                            notes = doc.getString("notes") ?: "",
+                            createdAt = doc.getLong("createdAt") ?: System.currentTimeMillis()
+                        )
+                        bookings.add(booking)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+                bookingAdapter.updateBookings(bookings)
             }
     }
 

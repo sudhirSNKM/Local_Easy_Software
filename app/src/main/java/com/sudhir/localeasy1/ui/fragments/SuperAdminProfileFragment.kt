@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -29,6 +30,7 @@ class SuperAdminProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        view.findViewById<TextView>(com.sudhir.localeasy1.R.id.titleText).text = "Profile"
         loadProfile()
         binding.logoutBtn.setOnClickListener {
             auth.signOut()
@@ -41,9 +43,9 @@ class SuperAdminProfileFragment : Fragment() {
 
     private fun loadProfile() {
         val uid = auth.currentUser?.uid ?: return
-        binding.emailValue.text = auth.currentUser?.email ?: "-"
+        _binding?.emailValue?.text = auth.currentUser?.email ?: "-"
         db.collection("users").document(uid).get().addOnSuccessListener {
-            binding.nameValue.text = it.getString("name") ?: "Super Admin"
+            _binding?.nameValue?.text = it.getString("name") ?: "Super Admin"
         }
     }
 

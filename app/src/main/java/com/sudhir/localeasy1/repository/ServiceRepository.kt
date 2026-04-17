@@ -26,7 +26,9 @@ class ServiceRepository {
                     duration = doc.getString("duration") ?: "",
                     category = doc.getString("category") ?: "",
                     businessId = doc.getString("businessId") ?: "",
-                    imageUrl = doc.getString("imageUrl") ?: ""
+                    imageUrl = doc.getString("imageUrl") ?: "",
+                    timings = doc.get("timings") as? List<String> ?: emptyList(),
+                    notes = doc.getString("notes") ?: ""
                 )
             }.filter { it.businessId in approvedBusinessIds }
         } catch (e: Exception) {
@@ -48,7 +50,9 @@ class ServiceRepository {
                     duration = doc.getString("duration") ?: "",
                     category = doc.getString("category") ?: "",
                     businessId = doc.getString("businessId") ?: "",
-                    imageUrl = doc.getString("imageUrl") ?: ""
+                    imageUrl = doc.getString("imageUrl") ?: "",
+                    timings = doc.get("timings") as? List<String> ?: emptyList(),
+                    notes = doc.getString("notes") ?: ""
                 )
             }.filter { it.businessId in approvedBusinessIds }
         } catch (e: Exception) {

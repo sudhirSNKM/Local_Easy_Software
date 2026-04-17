@@ -26,6 +26,7 @@ class ServiceListActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupRecyclerView()
+        binding.header.titleText.text = "Manage Services"
         loadBusinessAndServices()
     }
 

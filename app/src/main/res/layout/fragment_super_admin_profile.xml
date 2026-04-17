@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
+    android:fitsSystemWindows="true"
     android:padding="16dp">
 
     <LinearLayout
@@ -11,11 +12,7 @@
         android:layout_marginBottom="100dp"
         android:orientation="vertical">
 
-        <TextView
-            style="@style/TextTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Profile" />
+        <include layout="@layout/header" />
 
         <androidx.cardview.widget.CardView
             style="@style/CardStyle"

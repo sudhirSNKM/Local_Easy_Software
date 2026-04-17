@@ -1,5 +1,6 @@
 package com.sudhir.localeasy1.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -34,16 +35,10 @@ class HomeViewModel : ViewModel() {
             _error.value = null
             try {
                 val serviceList = serviceRepository.getAllServices()
-                // If no services from Firebase, provide sample data
-                if (serviceList.isEmpty()) {
-                    _services.value = getSampleServices()
-                } else {
-                    _services.value = serviceList
-                }
+                _services.value = serviceList
             } catch (e: Exception) {
-                // If Firebase fails, show sample data
-                _error.value = "Using offline data: ${e.message}"
-                _services.value = getSampleServices()
+                _error.value = "Error loading services: ${e.message}"
+                _services.value = emptyList()
             } finally {
                 _isLoading.value = false
             }
@@ -52,7 +47,7 @@ class HomeViewModel : ViewModel() {
 
     private fun loadCategories() {
         // Sample categories - in real app, fetch from backend
-        _categories.value = listOf("Salon", "Clinic", "Gym", "Spa", "Restaurant", "Cleaning")
+        _categories.value = listOf("All", "Salon", "Clinic", "Gym", "Spa", "Restaurant", "Cleaning")
     }
 
     fun loadServicesByCategory(category: String) {
@@ -61,64 +56,23 @@ class HomeViewModel : ViewModel() {
             _error.value = null
             try {
                 val serviceList = serviceRepository.getServicesByCategory(category)
-                // If no services from Firebase, filter sample data
-                if (serviceList.isEmpty()) {
-                    _services.value = getSampleServices().filter { it.category == category }
-                } else {
-                    _services.value = serviceList
+                Log.d("HomeViewModel", "Category: $category, Found services: ${serviceList.size}")
+                for (service in serviceList) {
+                    Log.d("HomeViewModel", "Service: ${service.name}, Category: ${service.category}, BusinessId: ${service.businessId}")
                 }
+                // Show only real data from database - no sample data fallback
+                _services.value = serviceList
             } catch (e: Exception) {
-                // If Firebase fails, filter sample data
-                _error.value = "Using offline data: ${e.message}"
-                _services.value = getSampleServices().filter { it.category == category }
+                Log.e("HomeViewModel", "Error loading services for category $category", e)
+                _error.value = "Error loading services: ${e.message}"
+                _services.value = emptyList()
             } finally {
                 _isLoading.value = false
             }
         }
     }
 
-    private fun getSampleServices(): List<Service> {
-        return listOf(
-            Service(
-                id = "1",
-                name = "Hair Cut & Styling",
-                price = 500,
-                duration = "45 mins",
-                category = "Salon",
-                businessId = "biz1"
-            ),
-            Service(
-                id = "2",
-                name = "General Checkup",
-                price = 800,
-                duration = "30 mins",
-                category = "Clinic",
-                businessId = "biz2"
-            ),
-            Service(
-                id = "3",
-                name = "Gym Membership",
-                price = 2000,
-                duration = "1 month",
-                category = "Gym",
-                businessId = "biz3"
-            ),
-            Service(
-                id = "4",
-                name = "Swedish Massage",
-                price = 1500,
-                duration = "60 mins",
-                category = "Spa",
-                businessId = "biz1"
-            ),
-            Service(
-                id = "5",
-                name = "Home Cleaning",
-                price = 1200,
-                duration = "2 hours",
-                category = "Cleaning",
-                businessId = "biz4"
-            )
-        )
+    fun loadAllServices() {
+        loadServices()
     }
 }

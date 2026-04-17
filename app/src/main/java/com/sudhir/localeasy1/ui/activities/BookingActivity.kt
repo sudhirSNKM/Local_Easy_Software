@@ -7,8 +7,10 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.GridLayoutManager
 import com.google.firebase.auth.FirebaseAuth
 import com.sudhir.localeasy1.databinding.ActivityBookingBinding
+import com.sudhir.localeasy1.ui.adapters.TimeSlotAdapter
 import com.sudhir.localeasy1.ui.viewmodel.BookingViewModel
 import java.util.*
 
@@ -17,6 +19,7 @@ class BookingActivity : AppCompatActivity() {
     private lateinit var binding: ActivityBookingBinding
     private val bookingViewModel: BookingViewModel by viewModels()
     private var selectedTime: Long? = null
+    private lateinit var timeSlotAdapter: TimeSlotAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,19 +32,33 @@ class BookingActivity : AppCompatActivity() {
             return
         }
 
+        setupRecyclerView()
         setupTimeSlots()
+        binding.header.titleText.text = "Book Service"
         setupObservers()
         bookingViewModel.loadService(serviceId)
+    }
+
+    private fun setupRecyclerView() {
+        timeSlotAdapter = TimeSlotAdapter { time ->
+            selectedTime = time
+            bookingViewModel.selectTime(time)
+        }
+        binding.timeSlotsRecyclerView.apply {
+            layoutManager = GridLayoutManager(this@BookingActivity, 3)
+            adapter = timeSlotAdapter
+        }
     }
 
     private fun setupTimeSlots() {
         val calendar = Calendar.getInstance()
         val currentTime = calendar.timeInMillis
+        val slots = mutableListOf<Long>()
 
         // Generate time slots for next 7 days
         for (day in 0..6) {
             for (hour in 9..17) { // 9 AM to 5 PM
-                calendar.timeInMillis = currentTime
+                calendar.timeInMillis = System.currentTimeMillis()
                 calendar.add(Calendar.DAY_OF_MONTH, day)
                 calendar.set(Calendar.HOUR_OF_DAY, hour)
                 calendar.set(Calendar.MINUTE, 0)
@@ -50,22 +67,11 @@ class BookingActivity : AppCompatActivity() {
 
                 val timeSlot = calendar.timeInMillis
                 if (timeSlot > currentTime) {
-                    addTimeSlotButton(timeSlot)
+                    slots.add(timeSlot)
                 }
             }
         }
-    }
-
-    private fun addTimeSlotButton(time: Long) {
-        val button = Button(this).apply {
-            text = android.text.format.DateFormat.format("MMM dd, HH:mm", Date(time)).toString()
-            setOnClickListener {
-                selectedTime = time
-                bookingViewModel.selectTime(time)
-                // Update UI to show selected
-            }
-        }
-        binding.timeSlotsGrid.addView(button)
+        timeSlotAdapter.updateSlots(slots)
     }
 
     private fun setupObservers() {

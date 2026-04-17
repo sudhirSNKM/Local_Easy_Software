@@ -35,7 +35,6 @@ class AdminViewModel : ViewModel() {
     fun loadDashboardData(businessId: String) {
         loadBookings(businessId)
         loadServices(businessId)
-        calculateStats()
     }
 
     private fun loadBookings(businessId: String) {
@@ -44,7 +43,9 @@ class AdminViewModel : ViewModel() {
             _error.value = null
             try {
                 val bookingList = bookingRepository.getBusinessBookings(businessId)
+                    .sortedByDescending { it.time }
                 _bookings.value = bookingList
+                calculateStats(bookingList, _services.value ?: emptyList())
             } catch (e: Exception) {
                 _error.value = e.message ?: "Failed to load bookings"
             } finally {
@@ -60,14 +61,14 @@ class AdminViewModel : ViewModel() {
                 val serviceList = serviceRepository.getAllServices()
                     .filter { it.businessId == businessId }
                 _services.value = serviceList
+                calculateStats(_bookings.value ?: emptyList(), serviceList)
             } catch (e: Exception) {
                 _error.value = e.message ?: "Failed to load services"
             }
         }
     }
 
-    private fun calculateStats() {
-        val bookings = _bookings.value ?: emptyList()
+    private fun calculateStats(bookings: List<Booking>, services: List<Service>) {
         val today = System.currentTimeMillis()
         val startOfDay = today - (today % (24 * 60 * 60 * 1000))
 
@@ -75,26 +76,22 @@ class AdminViewModel : ViewModel() {
         _bookingsToday.value = todayBookings.size
 
         // Calculate revenue (simplified)
-        val totalRevenue = bookings.filter { it.status == "completed" }
+        val totalRevenue = bookings.filter { it.status == "confirmed" || it.status == "completed" }
             .sumOf { booking ->
-                val service = _services.value?.find { it.id == booking.serviceId }
+                val service = services.find { it.id == booking.serviceId }
                 service?.price?.toDouble() ?: 0.0
             }
         _revenue.value = totalRevenue
     }
 
-    fun updateBookingStatus(bookingId: String, status: String) {
+    fun updateBookingStatus(bookingId: String, status: String, businessId: String) {
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
             try {
                 val result = bookingRepository.updateBookingStatus(bookingId, status)
                 result.onSuccess {
-                    // Reload bookings
-                    val currentBookings = _bookings.value ?: emptyList()
-                    val businessId = currentBookings.firstOrNull()?.businessId ?: ""
                     loadBookings(businessId)
-                    calculateStats()
                 }.onFailure { e ->
                     _error.value = e.message ?: "Failed to update booking"
                 }

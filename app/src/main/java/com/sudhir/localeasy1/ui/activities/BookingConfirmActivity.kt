@@ -47,8 +47,7 @@ class BookingConfirmActivity : AppCompatActivity() {
             "businessId" to businessId,
             "price" to price,
             "status" to "pending",
-            "date" to java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date()),
-            "time" to java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(java.util.Date()),
+            "time" to System.currentTimeMillis(),
             "createdAt" to System.currentTimeMillis()
         )
 

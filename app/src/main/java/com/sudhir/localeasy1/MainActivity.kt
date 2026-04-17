@@ -23,6 +23,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var statusText: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(R.style.Theme_Localeasy1)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 

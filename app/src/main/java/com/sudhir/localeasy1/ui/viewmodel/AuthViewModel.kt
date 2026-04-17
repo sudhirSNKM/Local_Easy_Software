@@ -113,6 +113,7 @@ class AuthViewModel : ViewModel() {
         role: UserRole,
         businessName: String = "",
         businessDesc: String = "",
+        businessCategory: String = "",
         onSuccess: () -> Unit,
         onError: (String) -> Unit
     ) {
@@ -148,6 +149,7 @@ class AuthViewModel : ViewModel() {
                             ownerId = userId,
                             name = businessName,
                             description = businessDesc,
+                            category = businessCategory,
                             approved = false
                         )
                         db.collection("businesses").document(business.id).set(business).await()

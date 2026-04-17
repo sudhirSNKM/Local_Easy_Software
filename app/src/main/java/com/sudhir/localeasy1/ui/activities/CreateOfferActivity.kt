@@ -20,6 +20,7 @@ class CreateOfferActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         loadAdminBusinessState()
+        binding.header.titleText.text = "Create Offer"
         setupClickListener()
     }
 

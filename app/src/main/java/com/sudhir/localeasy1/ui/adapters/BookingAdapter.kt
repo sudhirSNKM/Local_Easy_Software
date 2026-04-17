@@ -1,16 +1,18 @@
 package com.sudhir.localeasy1.ui.adapters
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.sudhir.localeasy1.R
 import com.sudhir.localeasy1.data.Booking
 import com.sudhir.localeasy1.databinding.ItemBookingBinding
 import java.text.SimpleDateFormat
 import java.util.*
 
 class BookingAdapter(
-    private val bookings: List<Booking>,
+    private var bookings: List<Booking>,
     private val isAdmin: Boolean = false,
     private val onStatusUpdate: ((String, String) -> Unit)? = null
 ) : RecyclerView.Adapter<BookingAdapter.BookingViewHolder>() {
@@ -26,6 +28,11 @@ class BookingAdapter(
         holder.bind(bookings[position])
     }
 
+    fun updateBookings(newBookings: List<Booking>) {
+        bookings = newBookings
+        notifyDataSetChanged()
+    }
+
     override fun getItemCount(): Int = bookings.size
 
     inner class BookingViewHolder(private val binding: ItemBookingBinding) :
@@ -35,6 +42,16 @@ class BookingAdapter(
             binding.serviceNameTextView.text = booking.serviceName
             binding.bookingTimeTextView.text = "${java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.getDefault()).format(java.util.Date(booking.time))}"
             binding.statusTextView.text = booking.status.uppercase()
+            
+            val (bgColor, textColor) = when (booking.status.lowercase()) {
+                "pending" -> R.drawable.status_pending_bg to Color.parseColor("#92400E")
+                "confirmed" -> R.drawable.status_confirmed_bg to Color.parseColor("#166534")
+                "cancelled" -> R.drawable.status_cancelled_bg to Color.parseColor("#991B1B")
+                else -> R.drawable.category_chip_bg to Color.WHITE
+            }
+            
+            binding.statusTextView.setBackgroundResource(bgColor)
+            binding.statusTextView.setTextColor(textColor)
 
             if (isAdmin && booking.status == "pending") {
                 binding.confirmButton.visibility = View.VISIBLE

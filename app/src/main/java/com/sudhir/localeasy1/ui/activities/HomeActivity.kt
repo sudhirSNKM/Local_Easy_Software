@@ -31,6 +31,7 @@ class HomeActivity : AppCompatActivity() {
             Log.d("HomeActivity", "Layout inflated successfully")
 
             setupRecyclerView()
+            binding.header.titleText.text = "Discover"
             setupCategoryButtons()
             setupObservers()
             Log.d("HomeActivity", "Setup completed")

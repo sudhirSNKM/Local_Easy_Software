@@ -2,6 +2,7 @@ package com.sudhir.localeasy1.ui.activities
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.sudhir.localeasy1.R
@@ -16,6 +17,7 @@ class UserMainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, true)
         binding = ActivityUserMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -47,6 +49,12 @@ class UserMainActivity : AppCompatActivity() {
 
     private fun loadFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction()
+            .setCustomAnimations(
+                R.anim.slide_in_right,
+                R.anim.fade_out,
+                R.anim.fade_in,
+                R.anim.slide_out_right
+            )
             .replace(R.id.frame_layout, fragment)
             .commit()
     }

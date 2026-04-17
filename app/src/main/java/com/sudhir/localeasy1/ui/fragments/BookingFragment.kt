@@ -62,27 +62,27 @@ class BookingFragment : Fragment() {
                     binding.emptyTextView.text = "No bookings found"
                 } else {
                     binding.emptyTextView.visibility = View.GONE
+                    val fetchedBookings = mutableListOf<Booking>()
                     for (doc in result) {
                         try {
-                            val bookingTime = doc.getLong("time") ?: 0L
-                            val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
-                            val timeFormat = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
-                            val date = dateFormat.format(java.util.Date(bookingTime))
-                            val time = timeFormat.format(java.util.Date(bookingTime))
-
                             val booking = Booking(
                                 id = doc.id,
                                 userId = doc.getString("userId") ?: "",
                                 serviceId = doc.getString("serviceId") ?: "",
+                                businessId = doc.getString("businessId") ?: "",
                                 serviceName = doc.getString("serviceName") ?: "Unknown Service",
-                                time = bookingTime,
-                                status = doc.getString("status") ?: "pending"
+                                time = doc.getLong("time") ?: System.currentTimeMillis(),
+                                status = doc.getString("status") ?: "pending",
+                                notes = doc.getString("notes") ?: "",
+                                createdAt = doc.getLong("createdAt") ?: System.currentTimeMillis()
                             )
-                            bookings.add(booking)
+                            fetchedBookings.add(booking)
                         } catch (e: Exception) {
                             Log.e("BookingFragment", "Error parsing booking", e)
                         }
                     }
+                    // Sort manually to avoid Firestore composite index requirement
+                    bookings.addAll(fetchedBookings.sortedByDescending { it.createdAt })
                     bookingAdapter.notifyDataSetChanged()
                 }
             }

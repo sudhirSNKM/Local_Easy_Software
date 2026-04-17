@@ -72,22 +72,23 @@
 
             <Button
                 android:id="@+id/editBtn"
-                style="?android:attr/borderlessButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:background="@drawable/btn_primary"
                 android:text="Edit"
-                android:textColor="@color/primary"
+                android:textColor="@color/white"
                 android:textStyle="bold" />
 
             <Button
                 android:id="@+id/deleteBtn"
-                style="?android:attr/borderlessButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/btn_error"
                 android:text="Delete"
-                android:textColor="@color/error"
+                android:textColor="@color/white"
                 android:textStyle="bold" />
 
         </LinearLayout>

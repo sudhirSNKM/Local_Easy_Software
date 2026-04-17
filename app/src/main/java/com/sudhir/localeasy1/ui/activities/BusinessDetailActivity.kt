@@ -1,8 +1,10 @@
 package com.sudhir.localeasy1.ui.activities
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import com.google.firebase.firestore.FirebaseFirestore
 import com.sudhir.localeasy1.databinding.ActivityBusinessDetailBinding
 
@@ -14,6 +16,7 @@ class BusinessDetailActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, true)
         binding = ActivityBusinessDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -37,9 +40,17 @@ class BusinessDetailActivity : AppCompatActivity() {
         db.collection("businesses").document(businessId).get()
             .addOnSuccessListener {
                 binding.businessNameText.text = it.getString("name") ?: "Business"
-                binding.businessOwnerText.text = "Owner: ${it.getString("ownerId") ?: "-"}"
+                val ownerId = it.getString("ownerId") ?: "-"
+                binding.businessOwnerText.text = "Owner: $ownerId"
                 val approved = it.getBoolean("approved") == true
-                binding.businessStatusText.text = if (approved) "Approved" else "Pending approval"
+                binding.businessStatusText.text = if (approved) "Status: Active" else "Status: Pending Approval"
+                if (ownerId != "-") {
+                    db.collection("users").document(ownerId).get().addOnSuccessListener { userDoc ->
+                        userDoc.getString("name")?.let { name ->
+                            binding.businessOwnerText.text = "Owner: $name"
+                        }
+                    }
+                }
             }
     }
 
@@ -85,6 +96,10 @@ class BusinessDetailActivity : AppCompatActivity() {
             .addOnSuccessListener {
                 Toast.makeText(this, "Business approved", Toast.LENGTH_SHORT).show()
                 loadBusinessInfo()
+            }
+            .addOnFailureListener { e ->
+                Log.e("BusinessDetail", e.message ?: "Approval failed")
+                Toast.makeText(this, "Approval failed: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 

@@ -38,24 +38,28 @@ class ProfileFragment : Fragment() {
     private fun loadUserProfile() {
         val user = auth.currentUser ?: return
 
-        binding.emailTextView.text = user.email ?: "No email"
+        _binding?.emailTextView?.text = user.email ?: "No email"
 
         // Load additional profile data from Firestore
         db.collection("users").document(user.uid)
             .get()
             .addOnSuccessListener { document ->
+                val currentBinding = _binding ?: return@addOnSuccessListener
                 if (document.exists()) {
-                    binding.nameTextView.text = document.getString("name") ?: "No name"
-                    binding.phoneTextView.text = document.getString("phone") ?: "No phone"
+                    currentBinding.nameTextView.text = document.getString("name") ?: "No name"
+                    currentBinding.phoneTextView.text = document.getString("phone") ?: "No phone"
                 } else {
-                    binding.nameTextView.text = "No name"
-                    binding.phoneTextView.text = "No phone"
+                    currentBinding.nameTextView.text = "No name"
+                    currentBinding.phoneTextView.text = "No phone"
                 }
             }
             .addOnFailureListener { e ->
+                if (!isAdded) return@addOnFailureListener
                 Toast.makeText(requireContext(), "Error loading profile: ${e.message}", Toast.LENGTH_SHORT).show()
-                binding.nameTextView.text = "Error loading name"
-                binding.phoneTextView.text = "Error loading phone"
+                _binding?.let {
+                    it.nameTextView.text = "Error loading name"
+                    it.phoneTextView.text = "Error loading phone"
+                }
             }
     }
 
@@ -76,7 +80,7 @@ class ProfileFragment : Fragment() {
     fun isProfileComplete(): Boolean {
         val user = auth.currentUser ?: return false
         val email = user.email
-        val phone = binding.phoneTextView.text.toString()
+        val phone = _binding?.phoneTextView?.text?.toString().orEmpty()
 
         return !email.isNullOrEmpty() && phone != "No phone" && phone.isNotEmpty()
     }

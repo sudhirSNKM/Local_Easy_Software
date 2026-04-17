@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.google.firebase.firestore.FirebaseFirestore
 import com.sudhir.localeasy1.databinding.FragmentSuperAdminAnalyticsBinding
@@ -25,17 +26,19 @@ class SuperAdminAnalyticsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        view.findViewById<TextView>(com.sudhir.localeasy1.R.id.titleText).text = "Analytics"
         loadAnalytics()
     }
 
     private fun loadAnalytics() {
         db.collection("bookings").get().addOnSuccessListener { result ->
-            binding.totalBookingsValue.text = result.size().toString()
+            val currentBinding = _binding ?: return@addOnSuccessListener
+            currentBinding.totalBookingsValue.text = result.size().toString()
             val totalRevenue = result.documents.sumOf { doc ->
                 doc.getDouble("price") ?: doc.getLong("price")?.toDouble() ?: 0.0
             }
-            binding.revenueValue.text = "Rs. ${totalRevenue.toInt()}"
-            binding.growthValue.text = if (result.size() > 0) "+12% this month" else "No growth data"
+            currentBinding.revenueValue.text = "Rs. ${totalRevenue.toInt()}"
+            currentBinding.growthValue.text = if (result.size() > 0) "+12% this month" else "No growth data"
         }
     }
 

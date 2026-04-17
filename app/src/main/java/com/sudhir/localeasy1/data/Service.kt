@@ -7,5 +7,7 @@ data class Service(
     val duration: String = "",
     val category: String = "",
     val businessId: String = "",
-    val imageUrl: String = ""
+    val imageUrl: String = "",
+    val timings: List<String> = emptyList(),
+    val notes: String = ""
 )

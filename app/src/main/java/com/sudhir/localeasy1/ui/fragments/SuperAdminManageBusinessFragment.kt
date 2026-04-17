@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.firestore.FirebaseFirestore
@@ -29,9 +30,15 @@ class SuperAdminManageBusinessFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        view.findViewById<TextView>(com.sudhir.localeasy1.R.id.titleText).text = "Manage Businesses"
         adapter = ManageBusinessAdapter(emptyList())
         binding.businessRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.businessRecyclerView.adapter = adapter
+        loadBusinesses()
+    }
+
+    override fun onResume() {
+        super.onResume()
         loadBusinesses()
     }
 
@@ -39,6 +46,7 @@ class SuperAdminManageBusinessFragment : Fragment() {
         db.collection("businesses")
             .get()
             .addOnSuccessListener { result ->
+                val currentBinding = _binding ?: return@addOnSuccessListener
                 val businesses = result.documents.map { doc ->
                     Business(
                         id = doc.id,
@@ -51,7 +59,7 @@ class SuperAdminManageBusinessFragment : Fragment() {
                         createdAt = doc.getLong("createdAt") ?: 0L
                     )
                 }
-                binding.emptyStateTextView.visibility = if (businesses.isEmpty()) View.VISIBLE else View.GONE
+                currentBinding.emptyStateTextView.visibility = if (businesses.isEmpty()) View.VISIBLE else View.GONE
                 adapter.updateList(businesses)
             }
     }
