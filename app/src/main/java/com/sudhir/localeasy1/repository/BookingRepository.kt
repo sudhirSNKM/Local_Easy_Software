@@ -51,7 +51,9 @@ class BookingRepository {
                     time = doc.getLong("time") ?: 0L,
                     status = doc.getString("status") ?: "pending",
                     notes = doc.getString("notes") ?: "",
-                    createdAt = doc.getLong("createdAt") ?: 0L
+                    createdAt = doc.getLong("createdAt") ?: 0L,
+                    userName = doc.getString("userName") ?: "",
+                    phone = doc.getString("phone") ?: ""
                 )
             }
         } catch (e: Exception) {
@@ -61,11 +63,16 @@ class BookingRepository {
 
     suspend fun getBusinessBookings(businessId: String): List<Booking> {
         return try {
+            android.util.Log.d("BOOKING_REPO_DEBUG", "Querying bookings for businessId: $businessId")
+
             val snapshot = db.collection("bookings")
                 .whereEqualTo("businessId", businessId)
                 .get().await()
+
+            android.util.Log.d("BOOKING_REPO_DEBUG", "Found ${snapshot.size()} documents")
+
             snapshot.documents.map { doc ->
-                Booking(
+                val booking = Booking(
                     id = doc.id,
                     userId = doc.getString("userId") ?: "",
                     serviceId = doc.getString("serviceId") ?: "",
@@ -74,10 +81,16 @@ class BookingRepository {
                     time = doc.getLong("time") ?: 0L,
                     status = doc.getString("status") ?: "pending",
                     notes = doc.getString("notes") ?: "",
-                    createdAt = doc.getLong("createdAt") ?: 0L
+                    createdAt = doc.getLong("createdAt") ?: 0L,
+                    userName = doc.getString("userName") ?: "",
+                    phone = doc.getString("phone") ?: ""
                 )
+
+                android.util.Log.d("BOOKING_REPO_DEBUG", "Booking: ${booking.serviceName} - ${booking.userName} - ${booking.businessId}")
+                booking
             }
         } catch (e: Exception) {
+            android.util.Log.e("BOOKING_REPO_DEBUG", "Error getting business bookings", e)
             emptyList()
         }
     }
@@ -89,6 +102,48 @@ class BookingRepository {
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    suspend fun getBookingsForOwner(ownerId: String): List<Booking> {
+        return try {
+            // Get all businesses for this owner
+            val businessesSnapshot = db.collection("businesses")
+                .whereEqualTo("ownerId", ownerId)
+                .get().await()
+
+            val businessIds = businessesSnapshot.documents.map { it.id }
+
+            val allBookings = mutableListOf<Booking>()
+
+            // Get bookings for each business
+            for (businessId in businessIds) {
+                val snapshot = db.collection("bookings")
+                    .whereEqualTo("businessId", businessId)
+                    .get().await()
+
+                val bookings = snapshot.documents.map { doc ->
+                    Booking(
+                        id = doc.id,
+                        userId = doc.getString("userId") ?: "",
+                        serviceId = doc.getString("serviceId") ?: "",
+                        businessId = doc.getString("businessId") ?: "",
+                        serviceName = doc.getString("serviceName") ?: "",
+                        time = doc.getLong("time") ?: 0L,
+                        status = doc.getString("status") ?: "pending",
+                        notes = doc.getString("notes") ?: "",
+                        createdAt = doc.getLong("createdAt") ?: 0L,
+                        userName = doc.getString("userName") ?: "",
+                        phone = doc.getString("phone") ?: ""
+                    )
+                }
+                allBookings.addAll(bookings)
+            }
+
+            allBookings.sortedByDescending { it.time }
+        } catch (e: Exception) {
+            android.util.Log.e("BOOKING_REPO_DEBUG", "Error getting bookings for owner", e)
+            emptyList()
         }
     }
 }

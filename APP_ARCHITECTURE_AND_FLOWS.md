@@ -1,0 +1,615 @@
+# LocalEase App - User Flows & Architecture
+
+## 🔄 APP USER FLOWS
+
+### USER REGISTRATION & LOGIN FLOW
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    LAUNCH APP                               │
+│                   MainActivity.kt                           │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+                         ▼
+              ┌──────────────────────┐
+              │ Check Auth State     │
+              │ (Firebase Auth)      │
+              └──────┬───────────┬───┘
+                     │           │
+          ┌──────────┘           └──────────┐
+          │ Logged In                      │ Not Logged In
+          ▼                                 ▼
+    ┌──────────────┐               ┌─────────────────┐
+    │ Fetch Role   │               │  LoginActivity  │
+    └──────┬───────┘               │                 │
+           │                       │  • Email input  │
+    ┌──────▼────────┐              │  • Password     │
+    │               │              │  • Sign In      │
+    │   Role Type   │              │  • Register     │
+    │               │              │    button       │
+    └┬──────┬───┬──┬┘              └────┬────────────┘
+     │      │   │  │                    │
+     │      │   │  └─────────────┐      │
+     │      │   │                │      │
+     ▼      ▼   ▼                ▼      ▼
+  ┌──────┐ ┌──┐ ┌──────────┐  ┌─────────────────┐
+  │User  │ │Ad│ │SuperAdmin│  │SignupActivity   │
+  │Main  │ │mi│ │Activity  │  │                 │
+  │Activ.│ │n │ │          │  │• Name           │
+  │      │ │  │ │          │  │• Email          │
+  │Disc. │ │Da│ │Approval  │  │• Password       │
+  │Book. │ │sh│ │System    │  │• Role select    │
+  │Prof. │ │bo│ │          │  │• Business (if   │
+  └──────┘ │ar│ │          │  │  Admin)         │
+           │d │ │          │  │• Register       │
+           └──┘ │          │  └─────────────────┘
+               └──────────┘
+```
+
+---
+
+### HOME SCREEN FLOW (USER DISCOVERY)
+
+```
+┌──────────────────────────────────────┐
+│     HomeActivity                     │
+│     (Discover Services)              │
+└────────┬─────────────────────────────┘
+         │
+         ▼
+    ┌────────────────────┐
+    │ Load Categories    │
+    │ (All, Salon,       │
+    │  Clinic, Gym,      │
+    │  Spa, Restaurant,  │
+    │  Cleaning)         │
+    └────┬───────────────┘
+         │
+         ▼
+    ┌────────────────────────────────┐
+    │  Click Category                │
+    │  ↓                             │
+    │  HomeViewModel                 │
+    │  .getServicesByCategory()      │
+    └────┬───────────────────────────┘
+         │
+         ▼
+    ┌────────────────────────────────┐
+    │  Query Firestore:              │
+    │  • services/                   │
+    │  • where category = selected   │
+    │  • where business.approved=true│
+    └────┬───────────────────────────┘
+         │
+         ▼
+    ┌────────────────────────────────┐
+    │  RecyclerView                  │
+    │  • Service Cards               │
+    │  • Name, Price, Duration       │
+    │  • Category                    │
+    │                                │
+    │  Click Service ──────┐         │
+    └─────────────────────┼─────────┘
+                          │
+                          ▼
+                    ┌──────────────────┐
+                    │ BookingActivity  │
+                    └──────────────────┘
+```
+
+---
+
+### BOOKING FLOW
+
+```
+┌──────────────────────────────────┐
+│   BookingActivity                │
+│   Selected Service Details       │
+└────────┬─────────────────────────┘
+         │
+         ▼
+    ┌────────────────────────────┐
+    │ Display Service:           │
+    │ • Name                     │
+    │ • Category                 │
+    │ • Duration                 │
+    │ • Price                    │
+    │ • Notes (if any)           │
+    └────┬─────────────────────────┘
+         │
+         ▼
+    ┌────────────────────────────┐
+    │ Time Slot Selection        │
+    │ • Grid of 7-day slots      │
+    │ • 9 AM - 5 PM hourly       │
+    │ • Click to select          │
+    └────┬─────────────────────────┘
+         │
+         ▼
+    ┌────────────────────────────┐
+    │ Optional Notes/Comments    │
+    │ • EditText for user notes  │
+    └────┬─────────────────────────┘
+         │
+         ▼
+    ┌────────────────────────────┐
+    │ Click "Complete Booking"   │
+    └────┬─────────────────────────┘
+         │
+         ▼
+    ┌────────────────────────────┐
+    │ onBookButtonClick()        │
+    │ Check Phone #              │
+    └────┬───────────────────────┘
+         │
+    ┌────┴────┐
+    │          │
+    │ Has Phone?
+    │          │
+Yes│          │No
+   ▼          ▼
+ Proceed   Navigate to
+           Profile to
+           Add Phone
+   │
+   ▼
+┌──────────────────────────────────┐
+│ Create Booking Object:           │
+│ • userId                         │
+│ • serviceId                      │
+│ • businessId                     │
+│ • serviceName                    │
+│ • time (selected)                │
+│ • status = "pending"             │
+│ • userName                       │
+│ • userPhone                      │
+│ • notes                          │
+└────┬──────────────────────────────┘
+     │
+     ▼
+┌──────────────────────────────────┐
+│ Save to Firestore:               │
+│ db.collection("bookings")        │
+│   .add(booking)                  │
+└────┬──────────────────────────────┘
+     │
+     ▼
+┌──────────────────────────────────┐
+│ Success Toast                    │
+│ Navigate Back                    │
+└──────────────────────────────────┘
+```
+
+---
+
+### ADMIN WORKFLOW
+
+```
+┌──────────────────────────────────┐
+│  AdminActivity                   │
+│  (Dashboard)                     │
+└────────┬─────────────────────────┘
+         │
+         ▼
+    ┌────────────────────┐
+    │ Dashboard Stats:   │
+    │ • Bookings Today   │
+    │ • Revenue          │
+    │ • Recent Bookings  │
+    └────────┬───────────┘
+             │
+        ┌────┴───────────────────┐
+        │                        │
+        ▼                        ▼
+   ┌───────────┐         ┌───────────────┐
+   │Add Service│         │Create Offer   │
+   └─────┬─────┘         └───────────────┘
+         │
+         ▼
+    ┌──────────────────────────────┐
+    │ AddServiceActivity           │
+    │                              │
+    │ • Service Name               │
+    │ • Category                   │
+    │ • Price                      │
+    │ • Duration                   │
+    │ • Time Slots (add multiple)  │
+    │ • Notes (optional)           │
+    │ • Submit                     │
+    └────┬─────────────────────────┘
+         │
+         ▼
+    ┌──────────────────────────────┐
+    │ Firestore Save:              │
+    │ services/                    │
+    │  {id}                        │
+    │    name, category, price     │
+    │    duration, timings[]       │
+    │    businessId, notes         │
+    └──────────────────────────────┘
+
+         │
+         │ (Also from Admin Dashboard)
+         │
+         ▼
+    ┌──────────────────────────┐
+    │ ServiceListActivity      │
+    │ (Manage Services)        │
+    │                          │
+    │ • Search by name         │
+    │ • Edit service           │
+    │ • Delete service         │
+    │ • View bookings per svc  │
+    └────┬─────────────────────┘
+         │
+         ▼
+    ┌──────────────────────────┐
+    │ Click Service            │
+    │ ↓                        │
+    │ Show Bookings            │
+    │ • User name              │
+    │ • Phone                  │
+    │ • Booking time           │
+    │ • Call button            │
+    │ • View button            │
+    └────┬─────────────────────┘
+         │
+         ▼
+    ┌──────────────────────────┐
+    │ BookingDetailActivity    │
+    │                          │
+    │ • User Details           │
+    │ • Contact Info           │
+    │ • Call Button            │
+    │ • Booking Status         │
+    └──────────────────────────┘
+```
+
+---
+
+### BUSINESS APPROVAL FLOW
+
+```
+┌────────────────────────────────────┐
+│  Admin SignUp                      │
+│  (Wants to be Business Owner)      │
+└────────┬─────────────────────────┘
+         │
+         ▼
+    ┌──────────────────────────────┐
+    │ Enter Business Details:      │
+    │ • Business Name              │
+    │ • Category                   │
+    │ • Description                │
+    │ • Address                    │
+    └────┬─────────────────────────┘
+         │
+         ▼
+    ┌──────────────────────────────┐
+    │ Save to Firestore:           │
+    │ businesses/                  │
+    │  {id}                        │
+    │    name, category            │
+    │    ownerId (uid)             │
+    │    approved: FALSE ❌        │
+    └────┬─────────────────────────┘
+         │
+         ▼
+    ┌──────────────────────────────┐
+    │ AdminActivity opens          │
+    │                              │
+    │ Status: "Waiting for         │
+    │ approval" ⏳                 │
+    │                              │
+    │ ❌ Cannot Add Services       │
+    │ ❌ Cannot Create Offers      │
+    └────┬─────────────────────────┘
+         │
+         ▼
+    ┌──────────────────────────────┐
+    │ SuperAdminActivity           │
+    │ (Offline/Backend Process)    │
+    │                              │
+    │ Review Business              │
+    │ Approve ✅ OR Reject ❌      │
+    │                              │
+    │ Update Firestore:            │
+    │ approved: TRUE               │
+    └────┬─────────────────────────┘
+         │
+         ▼
+    ┌──────────────────────────────┐
+    │ Admin Gets Notification      │
+    │ (Next login)                 │
+    │                              │
+    │ ✅ Can Now Add Services      │
+    │ ✅ Can Create Offers         │
+    └──────────────────────────────┘
+```
+
+---
+
+## 🗄️ DATABASE SCHEMA
+
+```
+Firestore Database Structure:
+├── users/
+│   └── {uid}/
+│       ├── name: String
+│       ├── email: String
+│       ├── phone: String
+│       ├── role: "user" | "admin" | "super_admin"
+│       └── createdAt: Timestamp
+│
+├── businesses/
+│   └── {businessId}/
+│       ├── name: String
+│       ├── description: String
+│       ├── ownerId: String (admin uid)
+│       ├── category: String
+│       ├── address: String
+│       ├── approved: Boolean
+│       └── createdAt: Timestamp
+│
+├── services/
+│   └── {serviceId}/
+│       ├── name: String
+│       ├── category: String
+│       ├── price: Double
+│       ├── duration: String
+│       ├── businessId: String
+│       ├── timings: String[]
+│       ├── notes: String
+│       └── createdAt: Timestamp
+│
+└── bookings/
+    └── {bookingId}/
+        ├── userId: String
+        ├── serviceId: String
+        ├── businessId: String
+        ├── serviceName: String
+        ├── time: Long (timestamp)
+        ├── status: "pending" | "confirmed" | "completed" | "cancelled"
+        ├── userName: String
+        ├── phone: String
+        ├── notes: String
+        └── createdAt: Timestamp
+```
+
+---
+
+## 🏗️ COMPONENT ARCHITECTURE
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    UI LAYER (Activities)                │
+├─────────────────────────────────────────────────────────┤
+│ • LoginActivity          • SuperAdminActivity           │
+│ • SignupActivity         • AddServiceActivity           │
+│ • UserMainActivity       • ServiceListActivity          │
+│ • HomeActivity           • BookingDetailActivity        │
+│ • BookingActivity        • CreateOfferActivity          │
+│ • ProfileActivity        • BusinessDetailActivity       │
+│ • AdminActivity                                          │
+└───────────────────┬──────────────────────────────────────┘
+                    │
+┌───────────────────▼──────────────────────────────────────┐
+│                  ViewModel LAYER                         │
+├──────────────────────────────────────────────────────────┤
+│ • AuthViewModel       • AdminViewModel                   │
+│ • HomeViewModel       • BookingViewModel                 │
+│ • ProfileViewModel                                        │
+└───────────────────┬──────────────────────────────────────┘
+                    │
+┌───────────────────▼──────────────────────────────────────┐
+│                 Repository LAYER                         │
+├──────────────────────────────────────────────────────────┤
+│ • AuthRepository       • ServiceRepository               │
+│ • BookingRepository    • UserRepository                  │
+└───────────────────┬──────────────────────────────────────┘
+                    │
+┌───────────────────▼──────────────────────────────────────┐
+│             Firebase (Backend)                           │
+├──────────────────────────────────────────────────────────┤
+│ • Firestore Database  • Authentication                   │
+│ • Real-time Sync      • Security Rules                   │
+└──────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🔐 DATA FLOW SECURITY
+
+```
+User Input (Activity)
+        │
+        ▼
+ViewModel (Validation + Coroutines)
+        │
+        ▼
+Repository (Firebase API)
+        │
+        ├─→ Firestore Auth (Check User)
+        │
+        └─→ Firestore DB (Query/Write with Security Rules)
+        │
+        ▼
+Response (LiveData back to UI)
+        │
+        ▼
+Observer (Update UI)
+        │
+        ▼
+User Sees Result
+```
+
+---
+
+## 🎯 FEATURE MATRIX
+
+```
+┌──────────────────┬────────┬────────┬──────────┐
+│ Feature          │ User   │ Admin  │ Super A. │
+├──────────────────┼────────┼────────┼──────────┤
+│ Discover Services│   ✅   │   ✅   │    ✅    │
+│ Book Service     │   ✅   │   ❌   │    ❌    │
+│ View My Bookings │   ✅   │   ❌   │    ❌    │
+│ Edit Profile     │   ✅   │   ✅   │    ✅    │
+│ Add Service      │   ❌   │   ✅*  │    ❌    │
+│ Manage Services  │   ❌   │   ✅*  │    ❌    │
+│ View Bookings    │   ❌   │   ✅*  │    ✅    │
+│ Create Offers    │   ❌   │   ✅*  │    ❌    │
+│ Approve Business │   ❌   │   ❌   │    ✅    │
+│ Manage Admin     │   ❌   │   ❌   │    ✅    │
+└──────────────────┴────────┴────────┴──────────┘
+* = After business approval
+```
+
+---
+
+## ⏱️ KEY TIMING OPERATIONS
+
+```
+OPERATION TIMING:
+┌─────────────────────────────────────┐
+│ Activity Transition                 │
+│ avg: 200-500ms                      │
+└─────────────────────────────────────┘
+
+┌─────────────────────────────────────┐
+│ Firebase Query (Network)            │
+│ avg: 1-3 seconds                    │
+└─────────────────────────────────────┘
+
+┌─────────────────────────────────────┐
+│ Data Sync to Firestore              │
+│ avg: 1-2 seconds                    │
+└─────────────────────────────────────┘
+
+┌─────────────────────────────────────┐
+│ RecyclerView Render (50 items)      │
+│ avg: 200-400ms                      │
+└─────────────────────────────────────┘
+
+┌─────────────────────────────────────┐
+│ Complete Booking Flow               │
+│ avg: 3-5 seconds (with network)     │
+└─────────────────────────────────────┘
+```
+
+---
+
+## 🔄 STATE MANAGEMENT FLOW
+
+```
+User Action (Click Button)
+        │
+        ▼
+Activity calls ViewModel method
+        │
+        ▼
+ViewModel executes business logic
+    (in viewModelScope.launch)
+        │
+        ▼
+ViewModel updates LiveData
+    (_isLoading, _error, _data)
+        │
+        ▼
+Activity observes LiveData changes
+        │
+        ▼
+Observer callback triggered
+        │
+        ▼
+Activity updates UI
+        │
+        ▼
+User sees result
+```
+
+---
+
+## 📱 RESPONSIVE LAYOUT
+
+```
+Phone Portrait (Default):
+┌─────────────────┐
+│     Header      │
+├─────────────────┤
+│                 │
+│    Content      │
+│    (varies)     │
+│                 │
+├─────────────────┤
+│  BottomNavView  │
+│  (User/Admin)   │
+└─────────────────┘
+
+Tablet/Landscape (Adaptive):
+┌──────────────┬──────────────┐
+│              │              │
+│  Sidebar/    │   Main       │
+│  Navigation  │   Content    │
+│              │              │
+│              ├──────────────┤
+│              │ BottomNav    │
+└──────────────┴──────────────┘
+```
+
+---
+
+## ✅ TESTING SCENARIOS
+
+```
+SCENARIO 1: New User Signup & First Booking
+1. Launch app → LoginActivity
+2. Click "Register now"
+3. Fill User details
+4. Select "Client" role
+5. Click Register
+6. Auto-navigate to HomeActivity
+7. Click "Clinic" category
+8. Click service
+9. Select time slot
+10. Get prompt: "Add phone first"
+11. Navigate to profile
+12. Add phone number
+13. Go back to booking
+14. Complete booking
+15. View in "My Bookings"
+
+SCENARIO 2: Admin Workflow
+1. Signup as Business Owner
+2. Fill business details
+3. Navigate to AdminActivity
+4. See "Waiting for approval"
+5. Cannot click "Add Service"
+6. Wait for super admin approval (offline)
+7. Login again
+8. "Add Service" now active
+9. Add service with times & notes
+10. Navigate to "Manage Services"
+11. Edit/Delete services
+12. View bookings received
+13. Click booking → See user details
+14. Click call → Dial user
+
+SCENARIO 3: Service Discovery
+1. Launch → HomeActivity
+2. Scroll categories
+3. Click "Salon"
+4. Services filter automatically
+5. Only approved business services shown
+6. Click service card
+7. View time slots
+8. Back to home
+9. Click "Gym"
+10. Different services shown
+```
+
+---
+
+**Architecture Diagram Created**: April 17, 2026  
+**Status**: ✅ Final Complete
+

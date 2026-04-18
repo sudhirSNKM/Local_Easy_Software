@@ -144,16 +144,20 @@ class AuthViewModel : ViewModel() {
 
                     // If Admin, create a pending business entry
                     if (role == UserRole.ADMIN) {
-                        val business = Business(
-                            id = db.collection("businesses").document().id,
-                            ownerId = userId,
-                            name = businessName,
-                            description = businessDesc,
-                            category = businessCategory,
-                            approved = false
-                        )
-                        db.collection("businesses").document(business.id).set(business).await()
-                        Log.d("AUTH", "Firestore: Business entry created for Admin")
+                        try {
+                            val business = Business(
+                                id = db.collection("businesses").document().id,
+                                ownerId = userId,
+                                name = businessName,
+                                description = businessDesc,
+                                category = businessCategory,
+                                approved = false
+                            )
+                            db.collection("businesses").document(business.id).set(business).await()
+                            Log.d("AUTH", "Firestore: Business entry created for Admin")
+                        } catch (e: Exception) {
+                            Log.e("AUTH", "Error creating business: ${e.message}", e)
+                        }
                     }
 
                     _userRole.value = role

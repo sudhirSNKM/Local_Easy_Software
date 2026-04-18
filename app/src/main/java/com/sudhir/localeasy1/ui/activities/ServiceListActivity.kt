@@ -19,6 +19,7 @@ class ServiceListActivity : AppCompatActivity() {
     private lateinit var serviceAdapter: ServiceAdapter
     private var businessId: String? = null
     private var businessApproved: Boolean = false
+    private var allServices = mutableListOf<Service>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +29,7 @@ class ServiceListActivity : AppCompatActivity() {
         setupRecyclerView()
         binding.header.titleText.text = "Manage Services"
         loadBusinessAndServices()
+        setupSearch()
     }
 
     private fun setupRecyclerView() {
@@ -69,6 +71,7 @@ class ServiceListActivity : AppCompatActivity() {
                     list.add(service)
                 }
                 
+                allServices = list // Save all services for search
                 serviceAdapter = ServiceAdapter(
                     services = list,
                     isAdmin = true,
@@ -80,6 +83,12 @@ class ServiceListActivity : AppCompatActivity() {
                     },
                     onDeleteClick = { service ->
                         deleteService(service)
+                    },
+                    onViewBookingsClick = { service ->
+                        val intent = Intent(this, ServiceBookingsActivity::class.java)
+                        intent.putExtra("serviceId", service.id)
+                        intent.putExtra("serviceName", service.name)
+                        startActivity(intent)
                     }
                 )
                 binding.serviceRecycler.adapter = serviceAdapter
@@ -87,6 +96,22 @@ class ServiceListActivity : AppCompatActivity() {
             .addOnFailureListener { e ->
                 Toast.makeText(this, "Error loading services: ${e.message}", Toast.LENGTH_SHORT).show()
             }
+    }
+
+    private fun setupSearch() {
+        binding.searchBar.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val query = s.toString().lowercase()
+                val filtered = allServices.filter {
+                    it.name.lowercase().contains(query)
+                }
+                serviceAdapter.updateList(filtered)
+            }
+
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
     }
 
     private fun deleteService(service: Service) {

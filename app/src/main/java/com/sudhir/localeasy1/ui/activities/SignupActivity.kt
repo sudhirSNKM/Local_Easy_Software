@@ -4,13 +4,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
-import android.widget.RadioButton
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import com.sudhir.localeasy1.MainActivity
 import com.sudhir.localeasy1.data.UserRole
 import com.sudhir.localeasy1.databinding.ActivitySignupBinding
 import com.sudhir.localeasy1.ui.viewmodel.AuthViewModel
@@ -33,8 +30,8 @@ class SignupActivity : AppCompatActivity() {
     }
 
     private fun setupCategoryDropdown() {
-        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, categories)
-        (binding.businessCategoryDropdown as? AutoCompleteTextView)?.setAdapter(adapter)
+        // Categories list for reference
+        // User can select from: Salon, Clinic, Gym, Spa, Restaurant, Cleaning
     }
 
     private fun setupObservers() {
@@ -108,7 +105,14 @@ class SignupActivity : AppCompatActivity() {
     }
 
     private fun navigateToMain() {
-        startActivity(Intent(this, MainActivity::class.java))
+        val role = authViewModel.userRole.value
+        val intent = when (role) {
+            UserRole.USER -> Intent(this, UserMainActivity::class.java)
+            UserRole.ADMIN -> Intent(this, AdminActivity::class.java)
+            UserRole.SUPER_ADMIN -> Intent(this, SuperAdminActivity::class.java)
+            null -> Intent(this, LoginActivity::class.java)
+        }
+        startActivity(intent)
         finish()
     }
 }

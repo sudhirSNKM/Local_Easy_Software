@@ -90,6 +90,11 @@
             android:exported="false"
             android:label="Business Details"
             android:theme="@style/Theme.Localeasy1" />
+        <activity
+            android:name=".ui.activities.ServiceBookingsActivity"
+            android:exported="false"
+            android:label="Service Bookings"
+            android:theme="@style/Theme.Localeasy1" />
     </application>
 
 </manifest>

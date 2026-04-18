@@ -4,11 +4,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.firestore.FirebaseFirestore
 import com.sudhir.localeasy1.data.Booking
 import com.sudhir.localeasy1.data.Service
 import com.sudhir.localeasy1.repository.BookingRepository
 import com.sudhir.localeasy1.repository.ServiceRepository
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class BookingViewModel : ViewModel() {
     private val bookingRepository = BookingRepository()
@@ -70,21 +72,38 @@ class BookingViewModel : ViewModel() {
                     return@launch
                 }
 
-                val booking = Booking(
-                    userId = userId,
-                    serviceId = service.id,
-                    businessId = service.businessId,
-                    serviceName = service.name,
-                    time = time,
-                    notes = notes
-                )
+                // Get user data
+                try {
+                    val userDoc = FirebaseFirestore.getInstance()
+                        .collection("users")
+                        .document(userId)
+                        .get()
+                        .await()
 
-                val result = bookingRepository.createBooking(booking)
-                result.onSuccess {
-                    _bookingSuccess.value = true
-                }.onFailure { e ->
-                    _error.value = e.message ?: "Failed to create booking"
+                    val userName = userDoc.getString("name") ?: "Unknown"
+                    val phone = userDoc.getString("phone") ?: ""
+
+                    val booking = Booking(
+                        userId = userId,
+                        serviceId = service.id,
+                        businessId = service.businessId,
+                        serviceName = service.name,
+                        time = time,
+                        notes = notes,
+                        userName = userName,
+                        phone = phone
+                    )
+
+                    val result = bookingRepository.createBooking(booking)
+                    result.onSuccess {
+                        _bookingSuccess.value = true
+                    }.onFailure { e ->
+                        _error.value = e.message ?: "Failed to create booking"
+                    }
+                } catch (e: Exception) {
+                    _error.value = "Failed to fetch user data: ${e.message}"
                 }
+
             } catch (e: Exception) {
                 _error.value = e.message ?: "Failed to create booking"
             } finally {

@@ -70,4 +70,27 @@ class ServiceRepository {
             Result.failure(e)
         }
     }
+
+    suspend fun getServicesByBusinessId(businessId: String): List<Service> {
+        return try {
+            val snapshot = db.collection("services")
+                .whereEqualTo("businessId", businessId)
+                .get().await()
+            snapshot.documents.map { doc ->
+                Service(
+                    id = doc.id,
+                    name = doc.getString("name") ?: "",
+                    price = doc.getLong("price")?.toInt() ?: 0,
+                    duration = doc.getString("duration") ?: "",
+                    category = doc.getString("category") ?: "",
+                    businessId = doc.getString("businessId") ?: "",
+                    imageUrl = doc.getString("imageUrl") ?: "",
+                    timings = doc.get("timings") as? List<String> ?: emptyList(),
+                    notes = doc.getString("notes") ?: ""
+                )
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
 }

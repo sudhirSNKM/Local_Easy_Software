@@ -14,6 +14,8 @@ class AdminViewModel : ViewModel() {
     private val bookingRepository = BookingRepository()
     private val serviceRepository = ServiceRepository()
 
+    private var ownerId: String = ""
+
     private val _bookings = MutableLiveData<List<Booking>>()
     val bookings: LiveData<List<Booking>> = _bookings
 
@@ -32,22 +34,32 @@ class AdminViewModel : ViewModel() {
     private val _revenue = MutableLiveData(0.0)
     val revenue: LiveData<Double> = _revenue
 
-    fun loadDashboardData(businessId: String) {
-        loadBookings(businessId)
+    fun loadDashboardData(ownerId: String, businessId: String) {
+        this.ownerId = ownerId
+        loadBookings(ownerId)
         loadServices(businessId)
     }
 
-    private fun loadBookings(businessId: String) {
+    private fun loadBookings(ownerId: String) {
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
             try {
-                val bookingList = bookingRepository.getBusinessBookings(businessId)
+                val bookingList = bookingRepository.getBookingsForOwner(ownerId)
                     .sortedByDescending { it.time }
+
+                // DEBUG LOGGING
+                android.util.Log.d("ADMIN_DEBUG", "Querying bookings for ownerId: $ownerId")
+                android.util.Log.d("ADMIN_DEBUG", "Found ${bookingList.size} bookings for ownerId: $ownerId")
+                bookingList.forEach { booking ->
+                    android.util.Log.d("ADMIN_DEBUG", "Loaded booking: service=${booking.serviceName}, businessId=${booking.businessId}, user=${booking.userName}")
+                }
+
                 _bookings.value = bookingList
                 calculateStats(bookingList, _services.value ?: emptyList())
             } catch (e: Exception) {
                 _error.value = e.message ?: "Failed to load bookings"
+                android.util.Log.e("ADMIN_DEBUG", "Error loading bookings", e)
             } finally {
                 _isLoading.value = false
             }
@@ -57,9 +69,8 @@ class AdminViewModel : ViewModel() {
     private fun loadServices(businessId: String) {
         viewModelScope.launch {
             try {
-                // In real app, filter by businessId
-                val serviceList = serviceRepository.getAllServices()
-                    .filter { it.businessId == businessId }
+                // Use the new method to get services specifically for this business
+                val serviceList = serviceRepository.getServicesByBusinessId(businessId)
                 _services.value = serviceList
                 calculateStats(_bookings.value ?: emptyList(), serviceList)
             } catch (e: Exception) {
@@ -70,17 +81,37 @@ class AdminViewModel : ViewModel() {
 
     private fun calculateStats(bookings: List<Booking>, services: List<Service>) {
         val today = System.currentTimeMillis()
-        val startOfDay = today - (today % (24 * 60 * 60 * 1000))
+        val calendar = java.util.Calendar.getInstance()
+        calendar.timeInMillis = today
+        calendar.set(java.util.Calendar.HOUR_OF_DAY, 0)
+        calendar.set(java.util.Calendar.MINUTE, 0)
+        calendar.set(java.util.Calendar.SECOND, 0)
+        calendar.set(java.util.Calendar.MILLISECOND, 0)
+        val startOfDay = calendar.timeInMillis
+        val endOfDay = startOfDay + (24 * 60 * 60 * 1000)
 
-        val todayBookings = bookings.filter { it.time >= startOfDay }
+        // Count all bookings created today OR scheduled for today
+        val todayBookings = bookings.filter { 
+            (it.createdAt in startOfDay until endOfDay) || (it.time in startOfDay until endOfDay)
+        }
         _bookingsToday.value = todayBookings.size
 
-        // Calculate revenue (simplified)
-        val totalRevenue = bookings.filter { it.status == "confirmed" || it.status == "completed" }
-            .sumOf { booking ->
-                val service = services.find { it.id == booking.serviceId }
-                service?.price?.toDouble() ?: 0.0
+        // Calculate revenue only for confirmed or completed bookings
+        var totalRevenue = 0.0
+        bookings.filter { it.status == "confirmed" || it.status == "completed" }
+            .forEach { booking ->
+                // Look for price in the booking first, then service
+                val price = try {
+                    // Try to find matching service to get price
+                    val service = services.find { it.id == booking.serviceId }
+                    service?.price?.toDouble() ?: 0.0
+                } catch (e: Exception) {
+                    0.0
+                }
+                totalRevenue += price
             }
+        
+        android.util.Log.d("ADMIN_STATS", "Stats Summary: Total Bookings=${bookings.size}, Today Count=${todayBookings.size}, Confirmed Revenue=$totalRevenue")
         _revenue.value = totalRevenue
     }
 
@@ -91,7 +122,7 @@ class AdminViewModel : ViewModel() {
             try {
                 val result = bookingRepository.updateBookingStatus(bookingId, status)
                 result.onSuccess {
-                    loadBookings(businessId)
+                    loadBookings(this@AdminViewModel.ownerId)
                 }.onFailure { e ->
                     _error.value = e.message ?: "Failed to update booking"
                 }

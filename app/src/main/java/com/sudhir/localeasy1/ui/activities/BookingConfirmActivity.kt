@@ -25,6 +25,9 @@ class BookingConfirmActivity : AppCompatActivity() {
         binding.serviceNameTextView.text = serviceName
         binding.priceTextView.text = "₹$price"
 
+        // Check if user has phone number
+        checkUserProfile()
+
         binding.confirmButton.setOnClickListener {
             confirmBooking(serviceName, price, serviceId, businessId)
         }
@@ -34,31 +37,65 @@ class BookingConfirmActivity : AppCompatActivity() {
         }
     }
 
+    private fun checkUserProfile() {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        db.collection("users").document(uid).get()
+            .addOnSuccessListener { document ->
+                val phone = document.getString("phone")
+                if (phone.isNullOrEmpty()) {
+                    Toast.makeText(this, "Please add your phone number before booking", Toast.LENGTH_LONG).show()
+                    // Redirect to profile
+                    startActivity(android.content.Intent(this, ProfileActivity::class.java))
+                    finish()
+                }
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Error checking profile", Toast.LENGTH_SHORT).show()
+            }
+    }
+
     private fun confirmBooking(serviceName: String, price: Double, serviceId: String, businessId: String) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
         binding.confirmButton.isEnabled = false
         binding.confirmButton.text = "Confirming..."
 
-        val booking = hashMapOf(
-            "userId" to uid,
-            "serviceName" to serviceName,
-            "serviceId" to serviceId,
-            "businessId" to businessId,
-            "price" to price,
-            "status" to "pending",
-            "time" to System.currentTimeMillis(),
-            "createdAt" to System.currentTimeMillis()
-        )
+        // Get user data
+        db.collection("users").document(uid).get()
+            .addOnSuccessListener { userDoc ->
+                val userName = userDoc.getString("name") ?: "Unknown"
+                val phone = userDoc.getString("phone") ?: ""
 
-        db.collection("bookings")
-            .add(booking)
-            .addOnSuccessListener {
-                Toast.makeText(this, "Booking confirmed!", Toast.LENGTH_SHORT).show()
-                finish()
+                val booking = hashMapOf(
+                    "userId" to uid,
+                    "serviceName" to serviceName,
+                    "serviceId" to serviceId,
+                    "businessId" to businessId,
+                    "price" to price,
+                    "status" to "pending",
+                    "time" to System.currentTimeMillis(), // Currently booking for 'now'
+                    "createdAt" to System.currentTimeMillis(),
+                    "userName" to userName,
+                    "phone" to phone
+                )
+
+                android.util.Log.d("BOOKING_DEBUG", "Creating booking for businessId: $businessId, price: $price")
+
+
+                db.collection("bookings")
+                    .add(booking)
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "Booking confirmed!", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                        binding.confirmButton.isEnabled = true
+                        binding.confirmButton.text = "Confirm Booking"
+                    }
             }
-            .addOnFailureListener { e ->
-                Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            .addOnFailureListener {
+                Toast.makeText(this, "Error fetching user data", Toast.LENGTH_SHORT).show()
                 binding.confirmButton.isEnabled = true
                 binding.confirmButton.text = "Confirm Booking"
             }

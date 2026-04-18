@@ -5,10 +5,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.sudhir.localeasy1.R
 import com.sudhir.localeasy1.databinding.FragmentProfileBinding
 import com.sudhir.localeasy1.ui.activities.LoginActivity
@@ -65,8 +68,7 @@ class ProfileFragment : Fragment() {
 
     private fun setupClickListeners() {
         binding.editProfileButton.setOnClickListener {
-            // TODO: Implement profile editing
-            Toast.makeText(requireContext(), "Profile editing coming soon", Toast.LENGTH_SHORT).show()
+            showEditProfileDialog()
         }
 
         binding.logoutButton.setOnClickListener {
@@ -74,6 +76,49 @@ class ProfileFragment : Fragment() {
             startActivity(Intent(requireContext(), LoginActivity::class.java))
             requireActivity().finish()
         }
+    }
+
+    private fun showEditProfileDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_edit_profile, null)
+        val nameEdit = dialogView.findViewById<EditText>(R.id.nameEditText)
+        val phoneEdit = dialogView.findViewById<EditText>(R.id.phoneEditText)
+
+        nameEdit.setText(binding.nameTextView.text.toString())
+        phoneEdit.setText(binding.phoneTextView.text.toString())
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Edit Profile")
+            .setView(dialogView)
+            .setPositiveButton("Save") { _, _ ->
+                val newName = nameEdit.text.toString().trim()
+                val newPhone = phoneEdit.text.toString().trim()
+
+                if (newName.isNotEmpty() && newPhone.isNotEmpty()) {
+                    updateProfile(newName, newPhone)
+                } else {
+                    Toast.makeText(requireContext(), "Please fill all fields", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun updateProfile(name: String, phone: String) {
+        val user = auth.currentUser ?: return
+        val profileData = hashMapOf(
+            "name" to name,
+            "phone" to phone
+        )
+
+        db.collection("users").document(user.uid)
+            .set(profileData, SetOptions.merge())
+            .addOnSuccessListener {
+                Toast.makeText(requireContext(), "Profile updated", Toast.LENGTH_SHORT).show()
+                loadUserProfile() // Reload profile
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 
     // Utility function to check if profile is complete

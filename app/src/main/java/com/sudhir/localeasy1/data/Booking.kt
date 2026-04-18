@@ -9,5 +9,7 @@ data class Booking(
     val time: Long = 0L,
     val status: String = "pending", // pending, confirmed, completed, cancelled
     val notes: String = "",
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val userName: String = "",
+    val phone: String = ""
 )

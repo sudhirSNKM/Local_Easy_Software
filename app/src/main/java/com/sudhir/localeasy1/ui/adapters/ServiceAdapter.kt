@@ -17,7 +17,8 @@ class ServiceAdapter(
     private val isAdmin: Boolean = false,
     private val onServiceClick: (Service) -> Unit = {},
     private val onEditClick: (Service) -> Unit = {},
-    private val onDeleteClick: (Service) -> Unit = {}
+    private val onDeleteClick: (Service) -> Unit = {},
+    private val onViewBookingsClick: (Service) -> Unit = {}
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -112,6 +113,11 @@ class ServiceAdapter(
 
             binding.deleteBtn.setOnClickListener {
                 onDeleteClick(service)
+            }
+
+            // View Bookings button
+            binding.viewBookingsBtn.setOnClickListener {
+                onViewBookingsClick(service)
             }
         }
     }

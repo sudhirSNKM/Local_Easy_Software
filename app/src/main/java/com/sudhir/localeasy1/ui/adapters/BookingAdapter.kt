@@ -14,7 +14,8 @@ import java.util.*
 class BookingAdapter(
     private var bookings: List<Booking>,
     private val isAdmin: Boolean = false,
-    private val onStatusUpdate: ((String, String) -> Unit)? = null
+    private val onStatusUpdate: ((String, String) -> Unit)? = null,
+    private val onViewClick: ((String) -> Unit)? = null
 ) : RecyclerView.Adapter<BookingAdapter.BookingViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BookingViewHolder {
@@ -53,20 +54,35 @@ class BookingAdapter(
             binding.statusTextView.setBackgroundResource(bgColor)
             binding.statusTextView.setTextColor(textColor)
 
-            if (isAdmin && booking.status == "pending") {
-                binding.confirmButton.visibility = View.VISIBLE
-                binding.cancelButton.visibility = View.VISIBLE
-
-                binding.confirmButton.setOnClickListener {
-                    onStatusUpdate?.invoke(booking.id, "confirmed")
+            if (isAdmin) {
+                binding.viewButton.visibility = View.VISIBLE
+                binding.viewButton.setOnClickListener {
+                    onViewClick?.invoke(booking.id)
                 }
 
-                binding.cancelButton.setOnClickListener {
-                    onStatusUpdate?.invoke(booking.id, "cancelled")
+                if (booking.status == "pending") {
+                    binding.confirmButton.visibility = View.VISIBLE
+                    binding.cancelButton.visibility = View.VISIBLE
+
+                    binding.confirmButton.setOnClickListener {
+                        onStatusUpdate?.invoke(booking.id, "confirmed")
+                    }
+
+                    binding.cancelButton.setOnClickListener {
+                        onStatusUpdate?.invoke(booking.id, "cancelled")
+                    }
+                } else {
+                    binding.confirmButton.visibility = View.GONE
+                    binding.cancelButton.visibility = View.GONE
                 }
             } else {
+                binding.viewButton.visibility = View.GONE
                 binding.confirmButton.visibility = View.GONE
                 binding.cancelButton.visibility = View.GONE
+            }
+
+            binding.root.setOnClickListener {
+                onViewClick?.invoke(booking.id)
             }
         }
     }

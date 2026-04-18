@@ -3,7 +3,6 @@ package com.sudhir.localeasy1.ui.activities
 import android.os.Bundle
 import android.view.View
 import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
@@ -29,8 +28,6 @@ class AddServiceActivity : AppCompatActivity() {
         isEdit = intent.getBooleanExtra("isEdit", false)
         serviceId = intent.getStringExtra("serviceId")
 
-        setupCategoryDropdown()
-
         if (isEdit && serviceId != null) {
             loadServiceData()
             binding.submitButton.text = "Update Service"
@@ -44,8 +41,8 @@ class AddServiceActivity : AppCompatActivity() {
     }
 
     private fun setupCategoryDropdown() {
-        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, categories)
-        (binding.categoryDropdown as? AutoCompleteTextView)?.setAdapter(adapter)
+        // Categories list for reference (user can type or select)
+        binding.categoryDropdown.hint = "Select category"
     }
 
     private fun loadAdminBusinessState() {
@@ -66,11 +63,11 @@ class AddServiceActivity : AppCompatActivity() {
             db.collection("services").document(id).get()
                 .addOnSuccessListener { doc ->
                     if (doc != null) {
-                        binding.serviceNameEditText.setText(doc.getString("name"))
-                        binding.categoryDropdown.setText(doc.getString("category"), false)
+                        binding.serviceNameEditText.setText(doc.getString("name") ?: "")
+                        binding.categoryDropdown.setText(doc.getString("category") ?: "")
                         binding.priceEditText.setText(doc.get("price").toString())
-                        binding.durationEditText.setText(doc.getString("duration"))
-                        binding.notesInput.setText(doc.getString("notes"))
+                        binding.durationEditText.setText(doc.getString("duration") ?: "")
+                        binding.notesInput.setText(doc.getString("notes") ?: "")
 
                         val timingsList = doc.get("timings") as? List<String>
                         if (timingsList != null) {

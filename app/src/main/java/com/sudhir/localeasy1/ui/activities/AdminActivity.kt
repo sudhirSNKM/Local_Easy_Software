@@ -39,9 +39,18 @@ class AdminActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        bookingAdapter = BookingAdapter(emptyList(), true) { bookingId, status ->
-            adminBusinessId?.let { adminViewModel.updateBookingStatus(bookingId, status, it) }
-        }
+        bookingAdapter = BookingAdapter(
+            bookings = emptyList(),
+            isAdmin = true,
+            onStatusUpdate = { bookingId, status ->
+                adminBusinessId?.let { adminViewModel.updateBookingStatus(bookingId, status, it) }
+            },
+            onViewClick = { bookingId ->
+                val intent = Intent(this, BookingDetailActivity::class.java)
+                intent.putExtra("bookingId", bookingId)
+                startActivity(intent)
+            }
+        )
         binding.bookingsRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.bookingsRecyclerView.adapter = bookingAdapter
     }
@@ -118,11 +127,6 @@ class AdminActivity : AppCompatActivity() {
         })
     }
 
-    private fun loadDashboardData() {
-        val businessId = adminBusinessId ?: return
-        adminViewModel.loadDashboardData(businessId)
-    }
-
     private fun loadBusinessState() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
@@ -143,6 +147,8 @@ class AdminActivity : AppCompatActivity() {
                     return@addOnSuccessListener
                 }
 
+                android.util.Log.d("ADMIN_DEBUG", "Business ID: $adminBusinessId, Approved: $adminBusinessApproved")
+
                 if (!adminBusinessApproved) {
                     Toast.makeText(this, "Business waiting for approval", Toast.LENGTH_SHORT).show()
                     binding.businessStatusTextView.text = "Pending approval. Please wait..."
@@ -150,7 +156,8 @@ class AdminActivity : AppCompatActivity() {
                 } else {
                     binding.businessStatusTextView.text = "Business Active"
                     binding.businessStatusTextView.setTextColor(Color.parseColor("#16A34A"))
-                    adminViewModel.loadDashboardData(adminBusinessId!!)
+                    android.util.Log.d("ADMIN_DEBUG", "Loading dashboard data for businessId: $adminBusinessId")
+                    adminViewModel.loadDashboardData(uid, adminBusinessId!!)
                 }
             }
     }

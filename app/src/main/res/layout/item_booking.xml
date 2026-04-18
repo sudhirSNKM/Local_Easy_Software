@@ -58,11 +58,24 @@
             android:orientation="horizontal">
 
             <Button
+                android:id="@+id/viewButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:background="@drawable/btn_primary"
+                android:text="VIEW"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:visibility="gone" />
+
+            <Button
                 android:id="@+id/confirmButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginEnd="8dp"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
                 android:background="@drawable/btn_primary"
                 android:text="Confirm"
                 android:textColor="@color/white"
@@ -74,7 +87,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="4dp"
                 android:background="@drawable/btn_error"
                 android:text="Cancel"
                 android:textColor="@color/white"
