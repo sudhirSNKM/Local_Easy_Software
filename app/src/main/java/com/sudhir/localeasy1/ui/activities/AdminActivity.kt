@@ -108,18 +108,6 @@ class AdminActivity : AppCompatActivity() {
             bookingAdapter.updateBookings(bookings)
         })
 
-        adminViewModel.bookingsToday.observe(this, Observer { count ->
-            binding.bookingsTodayTextView.text = count.toString()
-        })
-
-        adminViewModel.revenue.observe(this, Observer { revenue ->
-            binding.revenueTextView.text = "₹${revenue}"
-        })
-
-        adminViewModel.isLoading.observe(this, Observer { isLoading ->
-            // Show/hide loading
-        })
-
         adminViewModel.error.observe(this, Observer { error ->
             error?.let {
                 Toast.makeText(this, it, Toast.LENGTH_SHORT).show()

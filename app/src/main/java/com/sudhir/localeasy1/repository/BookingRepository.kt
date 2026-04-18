@@ -5,7 +5,7 @@ import com.sudhir.localeasy1.data.Booking
 import kotlinx.coroutines.tasks.await
 
 class BookingRepository {
-    private val db = FirebaseFirestore.getInstance()
+    private val db by lazy { FirebaseFirestore.getInstance() }
 
     suspend fun createBooking(booking: Booking): Result<String> {
         return try {

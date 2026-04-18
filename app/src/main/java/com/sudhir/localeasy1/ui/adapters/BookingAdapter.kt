@@ -41,18 +41,34 @@ class BookingAdapter(
 
         fun bind(booking: Booking) {
             binding.serviceNameTextView.text = booking.serviceName
-            binding.bookingTimeTextView.text = "${java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.getDefault()).format(java.util.Date(booking.time))}"
+            binding.bookingTimeTextView.text = "${java.text.SimpleDateFormat("dd MMM yyyy, hh:mm a", java.util.Locale.getDefault()).format(java.util.Date(booking.time))}"
+            binding.customerNameTextView.text = booking.userName.ifEmpty { "N/A" }
+            binding.customerPhoneTextView.text = booking.phone.ifEmpty { "N/A" }
             binding.statusTextView.text = booking.status.uppercase()
             
-            val (bgColor, textColor) = when (booking.status.lowercase()) {
-                "pending" -> R.drawable.status_pending_bg to Color.parseColor("#92400E")
-                "confirmed" -> R.drawable.status_confirmed_bg to Color.parseColor("#166534")
-                "cancelled" -> R.drawable.status_cancelled_bg to Color.parseColor("#991B1B")
-                else -> R.drawable.category_chip_bg to Color.WHITE
+            // Apply proper status styling
+            when (booking.status.lowercase()) {
+                "pending" -> {
+                    binding.statusTextView.setBackgroundResource(R.drawable.status_pending_bg)
+                    binding.statusTextView.setTextColor(Color.parseColor("#FFFACD"))
+                }
+                "confirmed" -> {
+                    binding.statusTextView.setBackgroundResource(R.drawable.status_confirmed_bg)
+                    binding.statusTextView.setTextColor(Color.WHITE)
+                }
+                "completed" -> {
+                    binding.statusTextView.setBackgroundResource(R.drawable.status_confirmed_bg)
+                    binding.statusTextView.setTextColor(Color.WHITE)
+                }
+                "cancelled" -> {
+                    binding.statusTextView.setBackgroundResource(R.drawable.status_cancelled_bg)
+                    binding.statusTextView.setTextColor(Color.WHITE)
+                }
+                else -> {
+                    binding.statusTextView.setBackgroundResource(R.drawable.category_chip_bg)
+                    binding.statusTextView.setTextColor(Color.WHITE)
+                }
             }
-            
-            binding.statusTextView.setBackgroundResource(bgColor)
-            binding.statusTextView.setTextColor(textColor)
 
             if (isAdmin) {
                 binding.viewButton.visibility = View.VISIBLE

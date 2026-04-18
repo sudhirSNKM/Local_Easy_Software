@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@color/background"
+    android:fitsSystemWindows="true">
 
     <include
         android:id="@+id/header"
@@ -47,10 +48,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/searchContainer"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
         android:paddingTop="8dp"
-        android:paddingBottom="8dp" />
+        android:paddingBottom="8dp"
+        android:clipToPadding="false" />
 
 </RelativeLayout>
-

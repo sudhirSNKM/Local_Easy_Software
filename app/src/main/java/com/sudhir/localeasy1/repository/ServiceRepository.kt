@@ -5,7 +5,7 @@ import com.sudhir.localeasy1.data.Service
 import kotlinx.coroutines.tasks.await
 
 class ServiceRepository {
-    private val db = FirebaseFirestore.getInstance()
+    private val db by lazy { FirebaseFirestore.getInstance() }
 
     private suspend fun getApprovedBusinessIds(): Set<String> {
         val businesses = db.collection("businesses")

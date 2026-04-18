@@ -2,7 +2,8 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/CardStyle"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -12,16 +13,18 @@
 
         <!-- Service Image Placeholder -->
         <View
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="90dp"
+            android:layout_height="90dp"
             android:layout_marginEnd="16dp"
-            android:background="@color/primary" />
+            android:background="@drawable/button_primary_bg"
+            android:elevation="4dp" />
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:gravity="center_vertical">
 
             <TextView
                 android:id="@+id/serviceNameTextView"
@@ -53,7 +56,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:textColor="@color/primary"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textStyle="bold" />
 
         </LinearLayout>
@@ -62,10 +65,12 @@
             android:id="@+id/bookButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:background="@drawable/btn_primary"
             android:text="Book"
             android:textColor="@color/white"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
     </LinearLayout>
 

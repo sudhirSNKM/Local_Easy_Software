@@ -6,8 +6,8 @@ import com.sudhir.localeasy1.data.UserRole
 import kotlinx.coroutines.tasks.await
 
 class AuthRepository {
-    private val auth = FirebaseAuth.getInstance()
-    private val db = FirebaseFirestore.getInstance()
+    private val auth by lazy { FirebaseAuth.getInstance() }
+    private val db by lazy { FirebaseFirestore.getInstance() }
 
     suspend fun login(email: String, password: String): Result<String> {
         return try {

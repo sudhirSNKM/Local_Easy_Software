@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "81384228604",
+    "project_id": "locayeasy1",
+    "storage_bucket": "locayeasy1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:81384228604:android:0fcf3f66d75c864236b979",
+        "android_client_info": {
+          "package_name": "sudhir.localeasy1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHFHqnjBUYRUYiRmLR6IJQ0S3WsScR_lI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
