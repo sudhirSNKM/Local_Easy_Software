@@ -42,15 +42,27 @@ class BookingAdapter(
         fun bind(booking: Booking) {
             binding.serviceNameTextView.text = booking.serviceName
             binding.bookingTimeTextView.text = "${java.text.SimpleDateFormat("dd MMM yyyy, hh:mm a", java.util.Locale.getDefault()).format(java.util.Date(booking.time))}"
-            binding.customerNameTextView.text = booking.userName.ifEmpty { "N/A" }
-            binding.customerPhoneTextView.text = booking.phone.ifEmpty { "N/A" }
+            
+            // Show/Hide customer details based on isAdmin
+            if (isAdmin) {
+                binding.customerDetailsLayout.visibility = View.VISIBLE
+                binding.customerDividerTop.visibility = View.VISIBLE
+                binding.customerDividerBottom.visibility = View.VISIBLE
+                binding.customerNameTextView.text = booking.userName.ifEmpty { "N/A" }
+                binding.customerPhoneTextView.text = booking.phone.ifEmpty { "N/A" }
+            } else {
+                binding.customerDetailsLayout.visibility = View.GONE
+                binding.customerDividerTop.visibility = View.GONE
+                binding.customerDividerBottom.visibility = View.GONE
+            }
+
             binding.statusTextView.text = booking.status.uppercase()
             
             // Apply proper status styling
             when (booking.status.lowercase()) {
                 "pending" -> {
                     binding.statusTextView.setBackgroundResource(R.drawable.status_pending_bg)
-                    binding.statusTextView.setTextColor(Color.parseColor("#FFFACD"))
+                    binding.statusTextView.setTextColor(Color.BLACK)
                 }
                 "confirmed" -> {
                     binding.statusTextView.setBackgroundResource(R.drawable.status_confirmed_bg)

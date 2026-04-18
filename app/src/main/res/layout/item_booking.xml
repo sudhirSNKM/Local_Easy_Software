@@ -57,15 +57,17 @@
 
         </LinearLayout>
 
-        <!-- Divider -->
+        <!-- Divider Top (Admin Only) -->
         <View
+            android:id="@+id/customerDividerTop"
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="#EEEEEE"
             android:layout_marginVertical="12dp" />
 
-        <!-- Customer Details Row -->
+        <!-- Customer Details Row (Admin Only) -->
         <LinearLayout
+            android:id="@+id/customerDetailsLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -121,8 +123,9 @@
 
         </LinearLayout>
 
-        <!-- Divider -->
+        <!-- Divider Bottom (Admin Only) -->
         <View
+            android:id="@+id/customerDividerBottom"
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="#EEEEEE"

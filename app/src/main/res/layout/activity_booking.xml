@@ -49,11 +49,28 @@
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/timeSlotDropdownContainer"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="32dp"
+                    android:hint="Choose Appointment Time">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/timeSlotAutoComplete"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/timeSlotsRecyclerView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="32dp"
+                    android:visibility="gone"
                     app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                     app:spanCount="3" />
 

@@ -21,6 +21,8 @@ class BookingActivity : AppCompatActivity() {
     private var selectedTime: Long? = null
     private lateinit var timeSlotAdapter: TimeSlotAdapter
 
+    private var timeSlotsList: List<Long> = emptyList()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityBookingBinding.inflate(layoutInflater)
@@ -32,21 +34,18 @@ class BookingActivity : AppCompatActivity() {
             return
         }
 
-        setupRecyclerView()
+        setupDropdown()
         setupTimeSlots()
         binding.header.titleText.text = "Book Service"
         setupObservers()
         bookingViewModel.loadService(serviceId)
     }
 
-    private fun setupRecyclerView() {
-        timeSlotAdapter = TimeSlotAdapter { time ->
+    private fun setupDropdown() {
+        binding.timeSlotAutoComplete.setOnItemClickListener { _, _, position, _ ->
+            val time = timeSlotsList[position]
             selectedTime = time
             bookingViewModel.selectTime(time)
-        }
-        binding.timeSlotsRecyclerView.apply {
-            layoutManager = GridLayoutManager(this@BookingActivity, 3)
-            adapter = timeSlotAdapter
         }
     }
 
@@ -54,6 +53,8 @@ class BookingActivity : AppCompatActivity() {
         val calendar = Calendar.getInstance()
         val currentTime = calendar.timeInMillis
         val slots = mutableListOf<Long>()
+        val slotStrings = mutableListOf<String>()
+        val sdf = java.text.SimpleDateFormat("MMM dd, yyyy - hh:mm a", Locale.getDefault())
 
         // Generate time slots for next 7 days
         for (day in 0..6) {
@@ -68,11 +69,16 @@ class BookingActivity : AppCompatActivity() {
                 val timeSlot = calendar.timeInMillis
                 if (timeSlot > currentTime) {
                     slots.add(timeSlot)
+                    slotStrings.add(sdf.format(Date(timeSlot)))
                 }
             }
         }
-        timeSlotAdapter.updateSlots(slots)
+        
+        timeSlotsList = slots
+        val adapter = android.widget.ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, slotStrings)
+        binding.timeSlotAutoComplete.setAdapter(adapter)
     }
+
 
     private fun setupObservers() {
         bookingViewModel.service.observe(this, Observer { service ->

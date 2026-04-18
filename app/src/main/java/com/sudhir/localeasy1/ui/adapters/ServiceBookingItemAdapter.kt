@@ -33,14 +33,24 @@ class ServiceBookingItemAdapter(
 
             // Set booking status with color
             binding.bookingStatus.text = booking.status.uppercase()
-            binding.bookingStatus.setBackgroundColor(
-                when (booking.status) {
-                    "confirmed" -> android.graphics.Color.parseColor("#22C55E")
-                    "completed" -> android.graphics.Color.parseColor("#3B82F6")
-                    "cancelled" -> android.graphics.Color.parseColor("#EF4444")
-                    else -> android.graphics.Color.parseColor("#F59E0B") // pending
+            when (booking.status.lowercase()) {
+                "confirmed" -> {
+                    binding.bookingStatus.setBackgroundResource(com.sudhir.localeasy1.R.drawable.status_confirmed_bg)
+                    binding.bookingStatus.setTextColor(android.graphics.Color.WHITE)
                 }
-            )
+                "completed" -> {
+                    binding.bookingStatus.setBackgroundResource(com.sudhir.localeasy1.R.drawable.status_confirmed_bg)
+                    binding.bookingStatus.setTextColor(android.graphics.Color.WHITE)
+                }
+                "cancelled" -> {
+                    binding.bookingStatus.setBackgroundResource(com.sudhir.localeasy1.R.drawable.status_cancelled_bg)
+                    binding.bookingStatus.setTextColor(android.graphics.Color.WHITE)
+                }
+                else -> { // pending
+                    binding.bookingStatus.setBackgroundResource(com.sudhir.localeasy1.R.drawable.status_pending_bg)
+                    binding.bookingStatus.setTextColor(android.graphics.Color.BLACK)
+                }
+            }
 
             // Call button
             binding.callBtn.setOnClickListener {
