@@ -39,6 +39,10 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        // Add fade-in animation to the entire layout
+        binding.root.startAnimation(android.view.animation.AnimationUtils.loadAnimation(requireContext(), R.anim.fade_in))
+
         try {
             Log.d("HomeFragment", "onViewCreated started")
             setupRecyclerView()
@@ -150,25 +154,64 @@ class HomeFragment : Fragment() {
 
     private fun loadApprovedOfferPromo() {
         db.collection("offers")
+            .whereEqualTo("isActive", true)
             .get()
             .addOnSuccessListener { result ->
-                result.documents.forEach { offerDoc ->
-                    val businessId = offerDoc.getString("businessId") ?: return@forEach
-                    db.collection("businesses")
-                        .document(businessId)
-                        .get()
+                binding.promoViewFlipper.removeAllViews()
+                val offersList = result.toObjects(com.sudhir.localeasy1.data.Offer::class.java)
+                
+                if (offersList.isEmpty()) {
+                    binding.promoViewFlipper.visibility = View.GONE
+                    return@addOnSuccessListener
+                }
+
+                var visibleOffersCount = 0
+                offersList.forEach { offer ->
+                    // Verify business exists and is approved
+                    db.collection("businesses").document(offer.businessId).get()
                         .addOnSuccessListener { businessDoc ->
-                            if (businessDoc.getBoolean("approved") == true) {
-                                val title = offerDoc.getString("title") ?: "Special Offer"
-                                val discount = offerDoc.getLong("discount")?.toInt()
-                                    ?: (offerDoc.getDouble("discount")?.toInt() ?: 0)
-                                binding.promoTitleTextView.text = title
-                                binding.promoSubtitleTextView.text = "Get $discount% off on selected services"
-                                return@addOnSuccessListener
+                            if (businessDoc.exists() && businessDoc.getBoolean("approved") == true) {
+                                addPromoToFlipper(offer)
+                                visibleOffersCount++
+                                
+                                // Show flipper if we have at least one valid offer
+                                if (visibleOffersCount > 0) {
+                                    binding.promoViewFlipper.visibility = View.VISIBLE
+                                    if (visibleOffersCount > 1) {
+                                        binding.promoViewFlipper.startFlipping()
+                                    }
+                                }
+                            } else if (!businessDoc.exists()) {
+                                // If business is deleted, delete the offer too
+                                db.collection("offers").document(offer.id).delete()
                             }
                         }
                 }
             }
+            .addOnFailureListener {
+                binding.promoViewFlipper.visibility = View.GONE
+            }
+    }
+
+    private fun addPromoToFlipper(offer: com.sudhir.localeasy1.data.Offer) {
+        val promoView = LayoutInflater.from(requireContext()).inflate(R.layout.item_promo, binding.promoViewFlipper, false)
+        
+        val titleView = promoView.findViewById<android.widget.TextView>(R.id.promoTitleTextView)
+        val subtitleView = promoView.findViewById<android.widget.TextView>(R.id.promoSubtitleTextView)
+        val actionButton = promoView.findViewById<android.widget.Button>(R.id.promoActionButton)
+        
+        titleView.text = offer.title
+        subtitleView.text = "Get ${offer.discount}% off on selected services"
+        
+        actionButton.setOnClickListener {
+            // Logic to navigate to that business's services
+            val intent = Intent(requireContext(), com.sudhir.localeasy1.ui.activities.ServiceListActivity::class.java).apply {
+                putExtra("businessId", offer.businessId)
+            }
+            startActivity(intent)
+        }
+        
+        binding.promoViewFlipper.addView(promoView)
     }
 
     override fun onDestroyView() {

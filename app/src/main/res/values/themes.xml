@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.Localeasy1" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="Theme.Localeasy1" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="android:colorBackground">@color/background</item>
         <item name="android:textColorPrimary">@color/text_primary</item>
         <item name="android:textColorSecondary">@color/text_secondary</item>
@@ -9,6 +9,7 @@
         <item name="colorAccent">@color/button_primary</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="android:statusBarColor">@color/button_primary</item>
     </style>
 
     <style name="CardStyle" parent="CardView">

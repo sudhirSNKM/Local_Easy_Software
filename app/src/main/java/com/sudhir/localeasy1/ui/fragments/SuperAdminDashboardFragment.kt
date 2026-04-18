@@ -26,6 +26,10 @@ class SuperAdminDashboardFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        // Add fade-in animation
+        binding.root.startAnimation(android.view.animation.AnimationUtils.loadAnimation(requireContext(), com.sudhir.localeasy1.R.anim.fade_in))
+
         view.findViewById<TextView>(com.sudhir.localeasy1.R.id.titleText).text = "Dashboard"
         loadStats()
     }

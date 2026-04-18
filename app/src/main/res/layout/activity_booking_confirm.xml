@@ -91,7 +91,7 @@
             android:id="@+id/cancelButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/error"
+            android:background="@drawable/btn_error"
             android:text="Cancel"
             android:textColor="@color/white"
             android:textStyle="bold" />

@@ -1,22 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
     android:background="@drawable/header_bg"
-    android:paddingTop="50dp"
+    android:fitsSystemWindows="true"
+    android:paddingTop="16dp"
     android:paddingBottom="20dp"
     android:paddingStart="20dp"
-    android:paddingEnd="20dp"
-    android:gravity="center_vertical">
+    android:paddingEnd="20dp">
 
     <TextView
         android:id="@+id/titleText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="8dp"
+        android:layout_toStartOf="@+id/logoImage"
         android:text="Title"
         android:textColor="@color/white"
         android:textSize="28sp"
         android:textStyle="bold"/>
 
-</LinearLayout>
+    <ImageView
+        android:id="@+id/logoImage"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="8dp"
+        android:src="@drawable/ic_app_logo"
+        android:contentDescription="App Logo"/>
+
+</RelativeLayout>
